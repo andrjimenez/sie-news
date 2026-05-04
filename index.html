@@ -305,7 +305,7 @@
         <div class="header">
             <h1>Sony Interactive Entertainment</h1>
             <p>Strategic Industry Insights for Consulting Team</p>
-            <div class="subtitle">Business unit news, market trends, and strategic implications</div>
+            <div class="subtitle">Business unit news from the past 3 months - market trends and strategic implications</div>
             <div class="last-updated">
                 Last updated: <span id="timestamp">Never</span>
             </div>
@@ -313,13 +313,13 @@
         
         <div class="controls">
             <div class="control-group">
-                <label for="filter">Filter by Business Unit:</label>
+                <label for="filter">Filter by Category:</label>
                 <select id="filter">
-                    <option value="">All business units</option>
-                    <option value="playstation">PlayStation</option>
-                    <option value="pc">PC Gaming</option>
-                    <option value="mobile">Mobile Gaming</option>
-                    <option value="corporate">Corporate Strategy</option>
+                    <option value="">All categories</option>
+                    <option value="hardware">Hardware</option>
+                    <option value="games">Games</option>
+                    <option value="network">Network & PS+</option>
+                    <option value="corporate">Corporate</option>
                 </select>
             </div>
             <button id="refresh-btn" onclick="refreshNews()">⟳ Refresh Insights</button>
@@ -334,68 +334,58 @@
     </div>
 
     <script>
-        // Your NewsAPI key - configured and ready
         const API_KEY = '49f62eab61c1478086ac707012433080';
         const CORS_PROXY = 'https://api.allorigins.win/get?url=';
         
         let allArticles = {};
 
-        // Business unit definitions
         const businessUnits = {
-            playstation: {
-                label: 'PlayStation',
-                description: 'Core Console Gaming Platform',
-                strategicFocus: 'Hardware innovation, exclusive content, subscription services, market dominance',
+            hardware: {
+                label: 'Hardware',
+                description: 'Console Hardware, Devices & Technology',
+                strategicFocus: 'PS5 Pro, console lifecycle, technical innovation, performance',
                 impacts: [
-                    'Console sales and market share trends',
-                    'First-party game studio acquisitions and IP expansion',
-                    'PlayStation Plus subscriber growth and monetization',
-                    'Hardware technology advancements (PS5 Pro)',
-                    'Exclusive game releases and competitive positioning',
-                    'Customer retention and engagement metrics',
-                    'Cross-generation platform strategy'
+                    'Console sales and hardware revenue',
+                    'Hardware performance benchmarks and comparisons',
+                    'Technology advancements and innovations',
+                    'Console availability and supply chain',
+                    'Hardware pricing and competitive positioning'
                 ]
             },
-            pc: {
-                label: 'PC Gaming',
-                description: 'Platform Expansion & Multi-Platform Strategy',
-                strategicFocus: 'Revenue diversification, Steam integration, PC ecosystem development',
+            games: {
+                label: 'Games',
+                description: 'Game Releases, Studios & Content',
+                strategicFocus: 'Exclusive titles, studio acquisitions, game development, content pipeline',
                 impacts: [
-                    'PlayStation exclusive ports to PC (strategic shift)',
-                    'Steam platform partnership and cross-platform play',
-                    'Revenue diversification beyond console',
-                    'Market reach expansion to PC gamers',
-                    'Account unification across platforms',
-                    'Competitive response to other platform strategies',
-                    'Software revenue growth from PC channel'
+                    'First-party game releases and exclusives',
+                    'Studio acquisitions and consolidations',
+                    'Game sales and player engagement',
+                    'Content pipeline and upcoming releases',
+                    'IP expansion and franchise development'
                 ]
             },
-            mobile: {
-                label: 'Mobile Gaming',
-                description: 'Business Diversification & New Market Entry',
-                strategicFocus: 'Market expansion, new revenue streams, geographic growth',
+            network: {
+                label: 'Network & PS+',
+                description: 'PlayStation Plus, Online Services & Subscriptions',
+                strategicFocus: 'Subscription growth, service revenue, online infrastructure',
                 impacts: [
-                    'Entry into high-growth mobile gaming market',
-                    'Geographic expansion (particularly Asia-Pacific)',
-                    'New monetization models and player bases',
-                    'Cloud gaming and streaming technology investment',
-                    'Mobile user acquisition and engagement',
-                    'Strategic studio acquisitions in mobile space',
-                    'IP leverage across mobile platforms'
+                    'PlayStation Plus subscriber growth and numbers',
+                    'Subscription tier performance and adoption',
+                    'Service improvements and new features',
+                    'Online gaming infrastructure and reliability',
+                    'Service revenue and ARPU metrics'
                 ]
             },
             corporate: {
-                label: 'Corporate Strategy',
-                description: 'Financial Performance & Overall Direction',
-                strategicFocus: 'Profitability, M&A activity, strategic partnerships, ESG',
+                label: 'Corporate',
+                description: 'Financial Performance, M&A & Strategy',
+                strategicFocus: 'Earnings, acquisitions, partnerships, market position',
                 impacts: [
-                    'Quarterly financial performance and margin trends',
-                    'Strategic acquisitions and studio consolidation',
-                    'Partnership announcements with other publishers',
-                    'Cybersecurity and data protection investments',
-                    'ESG initiatives and sustainability goals',
+                    'Quarterly earnings and financial performance',
+                    'Strategic acquisitions and partnerships',
+                    'Market share and competitive positioning',
                     'Investor relations and shareholder value',
-                    'Competitive positioning in gaming industry'
+                    'Corporate strategy announcements'
                 ]
             }
         };
@@ -434,17 +424,21 @@
             btn.disabled = true;
 
             try {
-             const searchQueries = [
-    { category: 'playstation', query: 'PlayStation exclusive' },
-    { category: 'pc', query: 'Steam release' },
-    { category: 'mobile', query: 'mobile app iOS Android' },
-    { category: 'corporate', query: 'Sony earnings financial' }
-];
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                const fromDate = threeMonthsAgo.toISOString().split('T')[0];
+
+                const searchQueries = [
+                    { category: 'hardware', query: 'PS5 Pro console hardware' },
+                    { category: 'games', query: 'PlayStation exclusive game release' },
+                    { category: 'network', query: 'PlayStation Plus subscription service' },
+                    { category: 'corporate', query: 'Sony earnings financial strategy' }
+                ];
 
                 const categorized = {
-                    playstation: [],
-                    pc: [],
-                    mobile: [],
+                    hardware: [],
+                    games: [],
+                    network: [],
                     corporate: []
                 };
 
@@ -452,7 +446,7 @@
 
                 for (const item of searchQueries) {
                     try {
-                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${API_KEY}`;
+                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&from=${fromDate}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${API_KEY}`;
                         const proxyUrl = CORS_PROXY + encodeURIComponent(apiUrl);
                         
                         const response = await fetch(proxyUrl);
@@ -463,7 +457,7 @@
                         if (apiData.articles && apiData.articles.length > 0) {
                             hasArticles = true;
                             categorized[item.category] = apiData.articles
-                                .slice(0, 5)
+                                .slice(0, 10)
                                 .map(article => ({
                                     title: article.title,
                                     source: article.source.name,
@@ -522,7 +516,7 @@
             const container = document.getElementById('articles');
             container.innerHTML = '';
 
-            const unitKeys = ['playstation', 'pc', 'mobile', 'corporate'];
+            const unitKeys = ['hardware', 'games', 'network', 'corporate'];
             const categoriesToShow = filter 
                 ? unitKeys.filter(key => key === filter)
                 : unitKeys;
@@ -563,7 +557,7 @@
                             </div>
                             <div class="article-excerpt">${article.excerpt.substring(0, 150)}${article.excerpt.length > 150 ? '...' : ''}</div>
                             <div class="business-impact">
-                                <strong>Strategic Implication:</strong>
+                                <strong>Why it Matters:</strong>
                                 <div class="impact-text">${randomImpact}</div>
                             </div>
                             <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link">Read full article →</a>
