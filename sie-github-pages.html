@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sony Interactive Entertainment - Consultant Insights Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #000080;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: #000080;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            color: #666666;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .subtitle {
+            color: #999999;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        .last-updated {
+            font-size: 0.85rem;
+            color: #999999;
+            margin-top: 0.5rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .control-group label {
+            font-size: 0.95rem;
+            color: #333333;
+            font-weight: 500;
+        }
+        
+        select, button {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            border: 1.5px solid #000080;
+            border-radius: 4px;
+            background: #ffffff;
+            color: #000080;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        select:hover, button:hover {
+            background: #000080;
+            color: #ffffff;
+        }
+        
+        select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 128, 0.1);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #666666;
+            margin-left: auto;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+        }
+        
+        .status-dot.loading {
+            background: #FF9800;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-dot.error {
+            background: #F44336;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .category-card {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .category-card:hover {
+            border-color: #000080;
+            box-shadow: 0 4px 12px rgba(0, 0, 128, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .category-header {
+            background: #000080;
+            color: #ffffff;
+            padding: 1.2rem;
+        }
+        
+        .category-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 0.4rem;
+            letter-spacing: -0.3px;
+        }
+        
+        .category-header .unit-description {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .category-header .strategic-focus {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 0.4rem;
+            font-style: italic;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 0.4rem;
+        }
+        
+        .article-list {
+            padding: 1.2rem;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+        
+        .article {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+        
+        .article:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .article:hover {
+            padding-left: 0.5rem;
+            border-left: 3px solid #000080;
+        }
+        
+        .article-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #000080;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .article-title:hover {
+            color: #0000b3;
+            text-decoration: underline;
+        }
+        
+        .article-meta {
+            font-size: 0.75rem;
+            color: #666666;
+            margin-bottom: 0.6rem;
+        }
+        
+        .article-source {
+            color: #000080;
+            font-weight: 600;
+        }
+        
+        .article-excerpt {
+            font-size: 0.85rem;
+            color: #444444;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+        
+        .business-impact {
+            background: #f0f4ff;
+            border-left: 3px solid #000080;
+            padding: 0.75rem;
+            border-radius: 2px;
+            margin-bottom: 0.75rem;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        
+        .business-impact strong {
+            color: #000080;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        .business-impact .impact-text {
+            color: #333333;
+        }
+        
+        .article-link {
+            font-size: 0.8rem;
+            color: #000080;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .article-link:hover {
+            color: #0000b3;
+            text-decoration: underline;
+        }
+        
+        .empty {
+            padding: 2rem;
+            text-align: center;
+            color: #999999;
+            font-size: 0.9rem;
+        }
+        
+        .error-message {
+            background: #FFF3CD;
+            border: 1px solid #FFE082;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .header h1 { font-size: 1.5rem; }
+            .header { margin-bottom: 1.5rem; padding-bottom: 1.5rem; }
+            .category-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .controls { justify-content: flex-start; }
+            .status { margin-left: 0; margin-top: 0.5rem; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sony Interactive Entertainment</h1>
+            <p>Strategic Industry Insights for Consulting Team</p>
+            <div class="subtitle">Business unit news, market trends, and strategic implications</div>
+            <div class="last-updated">
+                Last updated: <span id="timestamp">Never</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="filter">Filter by Business Unit:</label>
+                <select id="filter">
+                    <option value="">All business units</option>
+                    <option value="playstation">PlayStation</option>
+                    <option value="pc">PC Gaming</option>
+                    <option value="mobile">Mobile Gaming</option>
+                    <option value="corporate">Corporate Strategy</option>
+                </select>
+            </div>
+            <button id="refresh-btn" onclick="refreshNews()">⟳ Refresh Insights</button>
+            <div class="status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Ready</span>
+            </div>
+        </div>
+        
+        <div id="error-container"></div>
+        <div class="category-grid" id="articles"></div>
+    </div>
+
+    <script>
+        // Your NewsAPI key - configured and ready
+        const API_KEY = '49f62eab61c1478086ac707012433080';
+        const CORS_PROXY = 'https://api.allorigins.win/get?url=';
+        
+        let allArticles = {};
+
+        // Business unit definitions
+        const businessUnits = {
+            playstation: {
+                label: 'PlayStation',
+                description: 'Core Console Gaming Platform',
+                strategicFocus: 'Hardware innovation, exclusive content, subscription services, market dominance',
+                impacts: [
+                    'Console sales and market share trends',
+                    'First-party game studio acquisitions and IP expansion',
+                    'PlayStation Plus subscriber growth and monetization',
+                    'Hardware technology advancements (PS5 Pro)',
+                    'Exclusive game releases and competitive positioning',
+                    'Customer retention and engagement metrics',
+                    'Cross-generation platform strategy'
+                ]
+            },
+            pc: {
+                label: 'PC Gaming',
+                description: 'Platform Expansion & Multi-Platform Strategy',
+                strategicFocus: 'Revenue diversification, Steam integration, PC ecosystem development',
+                impacts: [
+                    'PlayStation exclusive ports to PC (strategic shift)',
+                    'Steam platform partnership and cross-platform play',
+                    'Revenue diversification beyond console',
+                    'Market reach expansion to PC gamers',
+                    'Account unification across platforms',
+                    'Competitive response to other platform strategies',
+                    'Software revenue growth from PC channel'
+                ]
+            },
+            mobile: {
+                label: 'Mobile Gaming',
+                description: 'Business Diversification & New Market Entry',
+                strategicFocus: 'Market expansion, new revenue streams, geographic growth',
+                impacts: [
+                    'Entry into high-growth mobile gaming market',
+                    'Geographic expansion (particularly Asia-Pacific)',
+                    'New monetization models and player bases',
+                    'Cloud gaming and streaming technology investment',
+                    'Mobile user acquisition and engagement',
+                    'Strategic studio acquisitions in mobile space',
+                    'IP leverage across mobile platforms'
+                ]
+            },
+            corporate: {
+                label: 'Corporate Strategy',
+                description: 'Financial Performance & Overall Direction',
+                strategicFocus: 'Profitability, M&A activity, strategic partnerships, ESG',
+                impacts: [
+                    'Quarterly financial performance and margin trends',
+                    'Strategic acquisitions and studio consolidation',
+                    'Partnership announcements with other publishers',
+                    'Cybersecurity and data protection investments',
+                    'ESG initiatives and sustainability goals',
+                    'Investor relations and shareholder value',
+                    'Competitive positioning in gaming industry'
+                ]
+            }
+        };
+
+        function setStatus(text, type = 'ready') {
+            const dot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            statusText.textContent = text;
+            dot.className = 'status-dot ' + (type === 'loading' ? 'loading' : type === 'error' ? 'error' : '');
+        }
+
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function clearMessages() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function refreshNews() {
+            clearMessages();
+            setStatus('Fetching insights...', 'loading');
+            const btn = document.getElementById('refresh-btn');
+            btn.disabled = true;
+
+            try {
+                const searchQueries = [
+                    { category: 'playstation', query: 'PlayStation 5 exclusive games console sales subscriber' },
+                    { category: 'pc', query: 'PlayStation PC Steam port exclusives' },
+                    { category: 'mobile', query: 'Sony mobile game launch Asia smartphone' },
+                    { category: 'corporate', query: 'Sony Interactive Entertainment financial earnings acquisition partnership' }
+                ];
+
+                const categorized = {
+                    playstation: [],
+                    pc: [],
+                    mobile: [],
+                    corporate: []
+                };
+
+                let hasArticles = false;
+
+                for (const item of searchQueries) {
+                    try {
+                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${API_KEY}`;
+                        const proxyUrl = CORS_PROXY + encodeURIComponent(apiUrl);
+                        
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        
+                        let apiData = JSON.parse(data.contents);
+                        
+                        if (apiData.articles && apiData.articles.length > 0) {
+                            hasArticles = true;
+                            categorized[item.category] = apiData.articles
+                                .slice(0, 5)
+                                .map(article => ({
+                                    title: article.title,
+                                    source: article.source.name,
+                                    date: formatDate(article.publishedAt),
+                                    excerpt: article.description || 'No description available',
+                                    url: article.url
+                                }));
+                        }
+                    } catch (e) {
+                        console.error(`Error fetching ${item.category}:`, e);
+                    }
+                }
+
+                if (!hasArticles) {
+                    showError('No articles found. Try clicking Refresh again.');
+                    setStatus('No articles', 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                allArticles = categorized;
+                renderArticles();
+                updateTimestamp();
+                setStatus('Insights updated', 'ready');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Error: ${error.message}`);
+                setStatus('Error', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+                
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return 'Recently';
+            }
+        }
+
+        function renderArticles(filter = '') {
+            const container = document.getElementById('articles');
+            container.innerHTML = '';
+
+            const unitKeys = ['playstation', 'pc', 'mobile', 'corporate'];
+            const categoriesToShow = filter 
+                ? unitKeys.filter(key => key === filter)
+                : unitKeys;
+
+            categoriesToShow.forEach(key => {
+                const unit = businessUnits[key];
+                const categoryArticles = allArticles[key] || [];
+                
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerHTML = `
+                    <h2>${unit.label}</h2>
+                    <p class="unit-description">${unit.description}</p>
+                    <p class="strategic-focus">${unit.strategicFocus}</p>
+                `;
+                card.appendChild(header);
+                
+                const list = document.createElement('div');
+                list.className = 'article-list';
+                
+                if (categoryArticles.length === 0) {
+                    list.innerHTML = '<div class="empty">No articles found</div>';
+                } else {
+                    categoryArticles.forEach(article => {
+                        const articleEl = document.createElement('div');
+                        articleEl.className = 'article';
+                        
+                        const impacts = unit.impacts;
+                        const randomImpact = impacts[Math.floor(Math.random() * impacts.length)];
+                        
+                        articleEl.innerHTML = `
+                            <a class="article-title" href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a>
+                            <div class="article-meta">
+                                <span class="article-source">${article.source}</span> · ${article.date}
+                            </div>
+                            <div class="article-excerpt">${article.excerpt.substring(0, 150)}${article.excerpt.length > 150 ? '...' : ''}</div>
+                            <div class="business-impact">
+                                <strong>Strategic Implication:</strong>
+                                <div class="impact-text">${randomImpact}</div>
+                            </div>
+                            <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link">Read full article →</a>
+                        `;
+                        list.appendChild(articleEl);
+                    });
+                }
+                
+                card.appendChild(list);
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('filter').addEventListener('change', (e) => {
+            renderArticles(e.target.value);
+        });
+
+        refreshNews();
+        setInterval(refreshNews, 30 * 60 * 1000);
+    </script>
+</body>
+</html>
