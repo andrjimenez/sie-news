@@ -446,7 +446,7 @@
 
                 for (const item of searchQueries) {
                     try {
-                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&from=${fromDate}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${API_KEY}`;
+                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${API_KEY}`;
                         const proxyUrl = CORS_PROXY + encodeURIComponent(apiUrl);
                         
                         const response = await fetch(proxyUrl);
