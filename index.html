@@ -284,11 +284,12 @@
 
             try {
                 const categorized = { hardware: [], games: [], network: [], corporate: [] };
+                const seenUrls = new Set();
                 let hasArticles = false;
 
                 for (const item of searchQueries) {
                     try {
-                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=10&apiKey=${API_KEY}`;
+                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${API_KEY}`;
                         const apiData = await fetchWithProxy(apiUrl);
 
                         if (apiData.status === 'error') {
@@ -299,14 +300,20 @@
                         }
 
                         if (apiData.articles && apiData.articles.length > 0) {
-                            hasArticles = true;
-                            categorized[item.category] = apiData.articles.slice(0, 8).map(article => ({
-                                title: article.title,
-                                source: article.source.name,
-                                date: formatDate(article.publishedAt),
-                                excerpt: article.description || 'No description available',
-                                url: article.url
-                            }));
+                            const uniqueArticles = apiData.articles.filter(article => !seenUrls.has(article.url));
+                            const articlesToAdd = uniqueArticles.slice(0, 8);
+                            articlesToAdd.forEach(article => seenUrls.add(article.url));
+
+                            if (articlesToAdd.length > 0) {
+                                hasArticles = true;
+                                categorized[item.category] = articlesToAdd.map(article => ({
+                                    title: article.title,
+                                    source: article.source.name,
+                                    date: formatDate(article.publishedAt),
+                                    excerpt: article.description || 'No description available',
+                                    url: article.url
+                                }));
+                            }
                         }
                     } catch (e) {
                         console.error(`Error fetching ${item.category}:`, e);
