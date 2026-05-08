@@ -236,12 +236,21 @@
             );
         }
 
+        function extractAmounts(title) {
+            return (title.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi) || [])
+                .map(n => n.replace(/[mb]/i, '').toLowerCase());
+        }
+
         function isSameStory(titleA, titleB) {
+            const amtsA = extractAmounts(titleA);
+            const amtsB = extractAmounts(titleB);
+            if (amtsA.length > 0 && amtsB.length > 0 && amtsA.some(a => amtsB.includes(a))) return true;
+
             const wordsA = fingerprintTitle(titleA);
             const wordsB = fingerprintTitle(titleB);
             if (wordsA.size === 0 || wordsB.size === 0) return false;
             const overlap = [...wordsA].filter(w => wordsB.has(w)).length;
-            return overlap / Math.min(wordsA.size, wordsB.size) >= 0.6;
+            return overlap / Math.min(wordsA.size, wordsB.size) >= 0.4;
         }
 
         async function generateInsightsForCategory(articles, categoryLabel, categoryContext) {
