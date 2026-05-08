@@ -139,11 +139,11 @@
             'impairment', 'write-down', 'writedown', 'write off',
             'ceo', 'chief executive', 'president', 'executive', 'appoint', 'resign', 'leadership',
             'investor', 'shareholder', 'market share', 'stock price', 'ipo',
-            'partnership', 'deal', 'agreement', 'collaborat',
+            'partnership', 'strategic deal', 'agreement', 'collaborat',
             'bungie', 'haven studios', 'insomniac', 'naughty dog', 'santa monica',
             'guerrilla games', 'sucker punch', 'media molecule', 'firesprite',
-            'class action', 'litigation', 'refund', 'pay customers', 'pay users',
-            'operating income', 'net income', 'fiscal', 'charge', 'buyout', 'valuation'
+            'class action', 'litigation', 'pay customers', 'pay users',
+            'operating income', 'net income', 'fiscal', 'buyout', 'valuation'
         ];
 
         const HARDWARE_SIGNALS = [
@@ -226,7 +226,7 @@
         function generateInsight(article) {
             const text = `${article.title} ${article.excerpt}`.toLowerCase();
             const insightMap = [
-                { keywords: ['settlement', 'fine', 'penalty', 'lawsuit', 'antitrust', 'legal', 'court', 'refund', 'class action'], insight: 'Legal and regulatory exposure creates reputational risk and can constrain SIE\'s ability to pursue future M&A.' },
+                { keywords: ['settlement', 'fine', 'penalty', 'lawsuit', 'antitrust', 'legal', 'court'], insight: 'Legal and regulatory exposure creates reputational risk and can constrain SIE\'s ability to pursue future M&A.' },
                 { keywords: ['impairment', 'write-down', 'writedown', 'write off'], insight: 'An impairment charge signals that the acquired asset has underperformed expectations, raising questions about SIE\'s M&A due diligence process.' },
                 { keywords: ['bungie'], insight: 'Bungie\'s performance is a bellwether for SIE\'s live service strategy — underperformance here puts the broader services growth thesis at risk.' },
                 { keywords: ['layoff', 'layoffs', 'restructur', 'job cut', 'redundan'], insight: 'Workforce reductions signal a reset in investment priorities and may delay upcoming title or service launches.' },
