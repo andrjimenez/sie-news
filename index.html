@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sony Interactive Entertainment - Team Insights Dashboard</title>
+    <title>Sony Interactive Entertainment - News Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -127,7 +127,6 @@
         }
         .business-impact strong { color: #000080; display: block; margin-bottom: 0.3rem; }
         .business-impact .impact-text { color: #333333; font-style: italic; }
-        .impact-loading { color: #999999; font-style: italic; }
         .article-link { font-size: 0.8rem; color: #000080; text-decoration: none; font-weight: 600; }
         .article-link:hover { color: #0000b3; text-decoration: underline; }
         .empty { padding: 2rem; text-align: center; color: #999999; font-size: 0.9rem; }
@@ -153,8 +152,8 @@
     <div class="container">
         <div class="header">
             <h1>Sony Interactive Entertainment</h1>
-            <p>Industry Insights</p>
-            <div class="subtitle">Latest news by business unit — market trends and strategic implications</div>
+            <p>News Dashboard</p>
+            <div class="subtitle">Latest news by category</div>
             <div class="last-updated">Last updated: <span id="timestamp">Never</span></div>
         </div>
         <div class="controls">
@@ -168,7 +167,7 @@
                     <option value="corporate">Corporate</option>
                 </select>
             </div>
-            <button id="refresh-btn" onclick="refreshNews()">⟳ Refresh Insights</button>
+            <button id="refresh-btn" onclick="refreshNews()">⟳ Refresh</button>
             <div class="status">
                 <div class="status-dot" id="status-dot"></div>
                 <span id="status-text">Ready</span>
@@ -210,11 +209,71 @@
         };
 
         const searchQueries = [
-            { category: 'hardware', queries: ['PS5 hardware', 'PlayStation console', 'Sony gaming hardware'] },
-            { category: 'games', queries: ['PlayStation games', 'Sony game release', 'PlayStation studio'] },
-            { category: 'network', queries: ['PlayStation Plus', 'PSN network', 'PlayStation subscription'] },
-            { category: 'corporate', queries: ['Sony gaming earnings', 'Sony Interactive', 'Sony financial results'] }
+            { category: 'hardware', queries: [
+                'Sony PlayStation 5 hardware',
+                'PS5 console Sony',
+                'PlayStation hardware Sony'
+            ]},
+            { category: 'games', queries: [
+                'Sony PlayStation game release',
+                'PlayStation exclusive Sony studio',
+                'Sony game announcement'
+            ]},
+            { category: 'network', queries: [
+                'PlayStation Plus Sony subscription',
+                'PSN PlayStation Network Sony',
+                'Sony PlayStation online service'
+            ]},
+            { category: 'corporate', queries: [
+                'Sony Interactive Entertainment',
+                'Sony PlayStation earnings revenue',
+                'Sony gaming acquisition strategy'
+            ]}
         ];
+
+        const SONY_TERMS = ['sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie', 'ps plus'];
+
+        function isSonyRelevant(article) {
+            const text = `${article.title} ${article.description || ''}`.toLowerCase();
+            return SONY_TERMS.some(term => text.includes(term));
+        }
+
+        function generateInsight(article, category) {
+            const text = `${article.title} ${article.excerpt}`.toLowerCase();
+
+            const insightMap = [
+                { keywords: ['price', 'cut', 'discount', 'cheaper'], insight: 'A price reduction could accelerate PS5 adoption and expand the addressable market ahead of the next console generation.' },
+                { keywords: ['sales', 'units', 'shipped', 'sold'], insight: 'Hardware unit sales directly signal console install base growth, which underpins software and services revenue.' },
+                { keywords: ['supply', 'stock', 'shortage', 'available'], insight: 'Supply constraints limit revenue potential and push consumers toward competing platforms.' },
+                { keywords: ['pro', 'upgrade', 'revision', 'new model'], insight: 'A hardware refresh at mid-cycle can re-energize the install base and drive attach rate for premium titles.' },
+                { keywords: ['chip', 'processor', 'gpu', 'performance', 'specs'], insight: 'Advances in processing power directly impact game fidelity and SIE\'s competitive differentiation versus Xbox and PC.' },
+                { keywords: ['exclusive', 'first-party', 'first party'], insight: 'Exclusive content remains SIE\'s primary lever for driving console preference and reducing platform churn.' },
+                { keywords: ['acquisition', 'acquires', 'studio', 'buys'], insight: 'Studio acquisitions expand SIE\'s first-party content pipeline and reduce dependence on third-party exclusivity deals.' },
+                { keywords: ['delay', 'delayed', 'postponed', 'pushed back'], insight: 'Title delays create gaps in the release calendar that can suppress hardware sales and subscriber engagement.' },
+                { keywords: ['launch', 'release', 'released', 'out now'], insight: 'New title launches drive hardware attach rates and short-term subscription acquisition spikes.' },
+                { keywords: ['review', 'score', 'rated', 'metacritic'], insight: 'Critical reception directly influences long-tail sales and reinforces SIE\'s reputation for quality first-party content.' },
+                { keywords: ['pc', 'steam', 'windows', 'port'], insight: 'PC ports monetize existing IP beyond the console install base, though timing must be managed to protect hardware sales incentives.' },
+                { keywords: ['subscriber', 'subscribers', 'membership', 'members'], insight: 'Subscriber count is SIE\'s key recurring revenue metric and a leading indicator of platform stickiness.' },
+                { keywords: ['tier', 'premium', 'essential', 'extra'], insight: 'Tier mix shifts signal how well SIE is monetizing its subscriber base beyond the base subscription level.' },
+                { keywords: ['catalog', 'library', 'free game', 'monthly game'], insight: 'Catalog depth and monthly title quality are the primary drivers of PS+ upgrade and retention behavior.' },
+                { keywords: ['outage', 'down', 'server', 'maintenance'], insight: 'Service disruptions directly impact user trust and increase churn risk, particularly among higher-tier subscribers.' },
+                { keywords: ['cloud', 'streaming', 'remote play'], insight: 'Cloud gaming expansion broadens SIE\'s serviceable market beyond console owners and competes directly with Xbox Game Pass Ultimate.' },
+                { keywords: ['revenue', 'earnings', 'profit', 'financial', 'results', 'quarterly'], insight: 'Financial performance reflects the health of SIE\'s hardware, software, and services mix.' },
+                { keywords: ['layoff', 'layoffs', 'restructur', 'headcount'], insight: 'Workforce reductions signal a shift in investment priorities and may impact upcoming title pipelines.' },
+                { keywords: ['partnership', 'deal', 'agreement', 'collaborat'], insight: 'Strategic partnerships can fill content gaps or expand platform reach without the capital cost of acquisition.' },
+                { keywords: ['ceo', 'executive', 'leadership', 'president', 'appoint'], insight: 'Leadership changes introduce strategic uncertainty and may signal shifts in platform or content investment direction.' },
+                { keywords: ['market share', 'competitor', 'competition'], insight: 'Competitive dynamics in the console market directly affect SIE\'s pricing power and content investment returns.' },
+                { keywords: ['lawsuit', 'legal', 'court', 'regulator', 'antitrust'], insight: 'Regulatory or legal exposure can constrain M&A activity and create reputational risk for the PlayStation brand.' }
+            ];
+
+            for (const entry of insightMap) {
+                if (entry.keywords.some(kw => text.includes(kw))) {
+                    return entry.insight;
+                }
+            }
+
+            return null; // Return null so the section is hidden if no match
+        }
 
         function setStatus(text, type = 'ready') {
             document.getElementById('status-text').textContent = text;
@@ -249,60 +308,7 @@
             }
         }
 
-        async function enrichArticles(articles, category) {
-            const articlesForPrompt = articles.map((a, i) => `${i}: TITLE: ${a.title} | EXCERPT: ${a.excerpt}`).join('\n');
-
-            const prompt = `You are analyzing news articles for a Sony Interactive Entertainment consulting team dashboard.
-
-Category: ${category}
-
-Articles:
-${articlesForPrompt}
-
-For each article:
-1. Mark as RELEVANT if Sony or PlayStation is meaningfully mentioned. Mark as NOT RELEVANT if the article is purely about Nintendo, Xbox, or other competitors with no Sony/PlayStation angle.
-2. If relevant, write a 1-sentence "Why it Matters" insight that is SPECIFIC to this article's content and its implications for Sony's ${category} business.
-
-Respond ONLY with a JSON array. Each element must have:
-- "index": the article number
-- "relevant": true or false
-- "whyItMatters": specific 1-sentence insight (only if relevant, otherwise empty string)
-
-JSON only. No markdown. No explanation.`;
-
-            try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [{ role: 'user', content: prompt }]
-                    })
-                });
-
-                const data = await response.json();
-                const text = data.content?.[0]?.text || '[]';
-                const results = JSON.parse(text.replace(/```json|```/g, '').trim());
-
-                return articles
-                    .filter((_, i) => {
-                        const match = results.find(r => r.index === i);
-                        return match && match.relevant === true;
-                    })
-                    .map(a => {
-                        const i = articles.indexOf(a);
-                        const match = results.find(r => r.index === i);
-                        return { ...a, whyItMatters: match?.whyItMatters || '' };
-                    });
-
-            } catch (e) {
-                console.error('Claude API error:', e);
-                return articles.map(a => ({ ...a, whyItMatters: 'Review article for strategic implications relevant to Sony.' }));
-            }
-        }
-
-        async function fetchCategory(queries, seenUrls) {
+        async function fetchCategory(queries, seenUrls, category) {
             for (const query of queries) {
                 try {
                     const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
@@ -314,9 +320,14 @@ JSON only. No markdown. No explanation.`;
                     }
 
                     if (apiData.articles && apiData.articles.length > 0) {
-                        const unique = apiData.articles.filter(a => a.url && !seenUrls.has(a.url));
-                        if (unique.length >= 3) {
-                            const toAdd = unique.slice(0, 15);
+                        const filtered = apiData.articles.filter(a =>
+                            a.url &&
+                            !seenUrls.has(a.url) &&
+                            isSonyRelevant(a)
+                        );
+
+                        if (filtered.length >= 3) {
+                            const toAdd = filtered.slice(0, 8);
                             toAdd.forEach(a => seenUrls.add(a.url));
                             return toAdd.map(a => ({
                                 title: a.title,
@@ -324,7 +335,7 @@ JSON only. No markdown. No explanation.`;
                                 date: formatDate(a.publishedAt),
                                 excerpt: a.description || 'No description available',
                                 url: a.url,
-                                whyItMatters: null
+                                whyItMatters: generateInsight({ title: a.title, excerpt: a.description || '' }, category)
                             }));
                         }
                     }
@@ -347,7 +358,7 @@ JSON only. No markdown. No explanation.`;
                 let hasArticles = false;
 
                 for (const item of searchQueries) {
-                    const articles = await fetchCategory(item.queries, seenUrls);
+                    const articles = await fetchCategory(item.queries, seenUrls, item.category);
                     if (articles.length > 0) {
                         hasArticles = true;
                         categorized[item.category] = articles;
@@ -361,23 +372,10 @@ JSON only. No markdown. No explanation.`;
                     return;
                 }
 
-                // Render immediately with loading placeholders
                 allArticles = categorized;
-                renderArticles(document.getElementById('filter').value, true);
+                renderArticles(document.getElementById('filter').value);
                 updateTimestamp();
-                setStatus('Generating insights...', 'loading');
-
-                // Enrich with Claude: filter non-Sony + generate Why it Matters
-                for (const key of Object.keys(categorized)) {
-                    if (categorized[key].length > 0) {
-                        const enriched = await enrichArticles(categorized[key], businessUnits[key].label);
-                        categorized[key] = enriched.slice(0, 8);
-                    }
-                }
-
-                allArticles = categorized;
-                renderArticles(document.getElementById('filter').value, false);
-                setStatus('Insights updated', 'ready');
+                setStatus('Updated', 'ready');
 
             } catch (error) {
                 console.error('Error:', error);
@@ -406,7 +404,7 @@ JSON only. No markdown. No explanation.`;
             }
         }
 
-        function renderArticles(filter = '', loading = false) {
+        function renderArticles(filter = '') {
             const container = document.getElementById('articles');
             container.innerHTML = '';
             const unitKeys = ['hardware', 'games', 'network', 'corporate'];
@@ -436,20 +434,17 @@ JSON only. No markdown. No explanation.`;
                     articles.forEach(article => {
                         const el = document.createElement('div');
                         el.className = 'article';
-                        const impactContent = loading
-                            ? `<span class="impact-loading">Generating insight...</span>`
-                            : `<span class="impact-text">${article.whyItMatters || 'See full article for details.'}</span>`;
-
                         el.innerHTML = `
                             <a class="article-title" href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a>
                             <div class="article-meta">
                                 <span class="article-source">${article.source}</span> · ${article.date}
                             </div>
                             <div class="article-excerpt">${article.excerpt.substring(0, 150)}${article.excerpt.length > 150 ? '...' : ''}</div>
+                            ${article.whyItMatters ? `
                             <div class="business-impact">
                                 <strong>Why it Matters:</strong>
-                                ${impactContent}
-                            </div>
+                                <span class="impact-text">${article.whyItMatters}</span>
+                            </div>` : ''}
                             <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link">Read full article →</a>
                         `;
                         list.appendChild(el);
