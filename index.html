@@ -20,126 +20,49 @@
             padding-bottom: 2rem;
             border-bottom: 3px solid #000080;
         }
-        .header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: #000080;
-            letter-spacing: -0.5px;
-        }
+        .header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; color: #000080; letter-spacing: -0.5px; }
         .header p { color: #666666; font-size: 1rem; margin-bottom: 0.5rem; }
         .header .subtitle { color: #999999; font-size: 0.9rem; font-style: italic; }
         .last-updated { font-size: 0.85rem; color: #999999; margin-top: 0.5rem; }
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-        }
+        .controls { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; justify-content: center; }
         .control-group { display: flex; gap: 0.75rem; align-items: center; }
         .control-group label { font-size: 0.95rem; color: #333333; font-weight: 500; }
         select, button {
-            padding: 0.6rem 1rem;
-            font-size: 0.9rem;
-            border: 1.5px solid #000080;
-            border-radius: 4px;
-            background: #ffffff;
-            color: #000080;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
+            padding: 0.6rem 1rem; font-size: 0.9rem; border: 1.5px solid #000080;
+            border-radius: 4px; background: #ffffff; color: #000080; cursor: pointer;
+            font-weight: 500; transition: all 0.2s ease;
         }
         select:hover, button:hover { background: #000080; color: #ffffff; }
         select:focus, button:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,0,128,0.1); }
         button:active { transform: scale(0.98); }
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: #666666;
-            margin-left: auto;
-        }
+        .status { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #666666; margin-left: auto; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; }
         .status-dot.loading { background: #FF9800; animation: pulse 1s infinite; }
         .status-dot.error { background: #F44336; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-        .category-card {
-            background: #f8f8f8;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .category-card:hover {
-            border-color: #000080;
-            box-shadow: 0 4px 12px rgba(0,0,128,0.1);
-            transform: translateY(-2px);
-        }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        .category-card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; transition: all 0.3s ease; }
+        .category-card:hover { border-color: #000080; box-shadow: 0 4px 12px rgba(0,0,128,0.1); transform: translateY(-2px); }
         .category-header { background: #000080; color: #ffffff; padding: 1.2rem; }
         .category-header h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 0.4rem; letter-spacing: -0.3px; }
         .category-header .unit-description { font-size: 0.8rem; opacity: 0.9; margin: 0; }
-        .category-header .strategic-focus {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            margin-top: 0.4rem;
-            font-style: italic;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 0.4rem;
-        }
+        .category-header .strategic-focus { font-size: 0.75rem; opacity: 0.8; margin-top: 0.4rem; font-style: italic; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 0.4rem; }
         .article-list { padding: 1.2rem; max-height: 700px; overflow-y: auto; }
-        .article {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e0e0e0;
-            transition: all 0.2s ease;
-        }
+        .article { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; transition: all 0.2s ease; }
         .article:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .article:hover { padding-left: 0.5rem; border-left: 3px solid #000080; }
-        .article-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #000080;
-            margin-bottom: 0.5rem;
-            line-height: 1.4;
-            text-decoration: none;
-            display: block;
-        }
+        .article-title { font-size: 0.95rem; font-weight: 600; color: #000080; margin-bottom: 0.5rem; line-height: 1.4; text-decoration: none; display: block; }
         .article-title:hover { color: #0000b3; text-decoration: underline; }
         .article-meta { font-size: 0.75rem; color: #666666; margin-bottom: 0.6rem; }
         .article-source { color: #000080; font-weight: 600; }
         .article-excerpt { font-size: 0.85rem; color: #444444; line-height: 1.5; margin-bottom: 0.75rem; }
-        .business-impact {
-            background: #f0f4ff;
-            border-left: 3px solid #000080;
-            padding: 0.75rem;
-            border-radius: 2px;
-            margin-bottom: 0.75rem;
-            font-size: 0.8rem;
-            line-height: 1.6;
-        }
+        .business-impact { background: #f0f4ff; border-left: 3px solid #000080; padding: 0.75rem; border-radius: 2px; margin-bottom: 0.75rem; font-size: 0.8rem; line-height: 1.6; }
         .business-impact strong { color: #000080; display: block; margin-bottom: 0.3rem; }
         .business-impact .impact-text { color: #333333; font-style: italic; }
         .article-link { font-size: 0.8rem; color: #000080; text-decoration: none; font-weight: 600; }
         .article-link:hover { color: #0000b3; text-decoration: underline; }
         .empty { padding: 2rem; text-align: center; color: #999999; font-size: 0.9rem; }
-        .error-message {
-            background: #FFF3CD;
-            border: 1px solid #FFE082;
-            color: #856404;
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
+        .error-message { background: #FFF3CD; border: 1px solid #FFE082; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.6; }
         @media (max-width: 768px) {
             body { padding: 1rem; }
             .header h1 { font-size: 1.5rem; }
@@ -189,126 +112,134 @@
             hardware: {
                 label: 'Hardware',
                 description: 'Console Hardware, Devices & Technology',
-                strategicFocus: 'PS5 Pro, console lifecycle, technical innovation, performance'
+                strategicFocus: 'PS5, PS5 Pro, console lifecycle, technical innovation'
             },
             games: {
                 label: 'Games',
                 description: 'Game Releases, Studios & Content',
-                strategicFocus: 'Exclusive titles, studio acquisitions, game development, content pipeline'
+                strategicFocus: 'Exclusive titles, studio news, game launches, gameplay'
             },
             network: {
                 label: 'Network & PS+',
                 description: 'PlayStation Plus, Online Services & Subscriptions',
-                strategicFocus: 'Subscription growth, service revenue, online infrastructure'
+                strategicFocus: 'PS+ tiers, subscribers, PSN, online services'
             },
             corporate: {
                 label: 'Corporate',
-                description: 'Financial Performance, M&A & Strategy',
-                strategicFocus: 'Earnings, acquisitions, partnerships, market position'
+                description: 'Financial Performance, M&A, Legal & Strategy',
+                strategicFocus: 'Earnings, acquisitions, legal, partnerships, leadership'
             }
         };
 
-        const categoryFilters = {
-            hardware: {
-                mustInclude: ['ps5', 'playstation 5', 'console hardware', 'dualsense', 'ps5 pro', 'playstation hardware', 'playstation console', 'next-gen console', 'sony console'],
-                mustExclude: []
-            },
-            games: {
-                mustInclude: ['game', 'games', 'title', 'studio', 'developer', 'exclusive', 'dlc', 'expansion', 'sequel', 'gameplay', 'release date', 'launch'],
-                mustExclude: ['earnings', 'revenue', 'quarterly', 'financial results', 'fine', 'lawsuit', 'subscription revenue', 'playstation plus subscribers', 'psn outage']
-            },
-            network: {
-                mustInclude: ['playstation plus', 'ps plus', 'psn', 'playstation network', 'online service', 'subscription', 'ps now', 'cloud gaming'],
-                mustExclude: ['earnings', 'revenue', 'acquisition', 'quarterly', 'financial results']
-            },
-            corporate: {
-                mustInclude: ['earnings', 'revenue', 'financial', 'quarterly', 'profit', 'acquisition', 'acquires', 'merger', 'partnership', 'ceo', 'executive', 'layoff', 'restructur', 'fine', 'lawsuit', 'regulator', 'antitrust', 'investor', 'market share', 'stock'],
-                mustExclude: []
-            }
-        };
+        const CORPORATE_SIGNALS = [
+            'earnings', 'revenue', 'profit', 'loss', 'financial results', 'quarterly',
+            'acquisition', 'acquires', 'acquired', 'merger', 'takeover',
+            'layoff', 'layoffs', 'redundan', 'restructur', 'job cut',
+            'settlement', 'lawsuit', 'legal', 'court', 'fine', 'penalty', 'regulator', 'antitrust',
+            'impairment', 'write-down', 'writedown', 'write off',
+            'ceo', 'chief executive', 'president', 'executive', 'appoint', 'resign', 'leadership',
+            'investor', 'shareholder', 'market share', 'stock price', 'ipo',
+            'partnership', 'deal', 'agreement', 'collaborat',
+            'bungie', 'haven studios', 'insomniac', 'naughty dog', 'santa monica'
+        ];
+
+        const HARDWARE_SIGNALS = [
+            'ps5 pro', 'playstation 5', 'ps5', 'dualsense', 'console hardware',
+            'playstation hardware', 'next-gen console', 'sony console',
+            'psvr', 'playstation vr', 'specs', 'teraflop', 'ssd speed'
+        ];
+
+        const NETWORK_SIGNALS = [
+            'playstation plus', 'ps plus', 'psn', 'playstation network',
+            'ps now', 'playstation now', 'ps+ subscribers', 'cloud gaming playstation',
+            'online service playstation', 'playstation subscription'
+        ];
+
+        const GAMES_SIGNALS = [
+            'game', 'games', 'title', 'exclusive', 'dlc', 'expansion',
+            'sequel', 'gameplay', 'release date', 'game launch', 'game studio',
+            'developer', 'game trailer', 'game preview', 'game review',
+            'playstation game', 'sony game'
+        ];
+
+        function assignCategory(article) {
+            const text = `${article.title} ${article.description || ''}`.toLowerCase();
+            if (CORPORATE_SIGNALS.some(kw => text.includes(kw))) return 'corporate';
+            if (HARDWARE_SIGNALS.some(kw => text.includes(kw))) return 'hardware';
+            if (NETWORK_SIGNALS.some(kw => text.includes(kw))) return 'network';
+            if (GAMES_SIGNALS.some(kw => text.includes(kw))) return 'games';
+            return null;
+        }
 
         const searchQueries = [
+            { category: 'corporate', queries: [
+                'Sony Interactive Entertainment financial earnings',
+                'Sony PlayStation acquisition lawsuit settlement',
+                'Sony gaming impairment layoff restructure bungie'
+            ]},
             { category: 'hardware', queries: [
                 'PlayStation 5 PS5 hardware console',
-                'PS5 Pro Sony hardware specs',
+                'PS5 Pro Sony specs performance',
                 'PlayStation console sales hardware'
             ]},
             { category: 'games', queries: [
-                'PlayStation exclusive game release 2025',
-                'Sony first party game studio announcement',
-                'PlayStation game launch title'
+                'PlayStation exclusive game release',
+                'Sony PlayStation game announcement launch',
+                'PlayStation studio game title'
             ]},
             { category: 'network', queries: [
-                'PlayStation Plus subscription Sony',
+                'PlayStation Plus PS+ subscription Sony',
                 'PlayStation Network PSN online service',
-                'PS Plus tier subscribers Sony'
-            ]},
-            { category: 'corporate', queries: [
-                'Sony earnings revenue quarterly financial',
-                'Sony PlayStation acquisition layoff restructure',
-                'Sony gaming fine lawsuit regulator'
+                'PS Plus subscribers tier Sony'
             ]}
         ];
 
-        const SONY_TERMS = ['sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie', 'ps plus'];
+        const SONY_TERMS = ['sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie', 'ps plus', 'playstation plus', 'bungie', 'insomniac', 'naughty dog'];
 
         function isSonyRelevant(article) {
             const text = `${article.title} ${article.description || ''}`.toLowerCase();
             return SONY_TERMS.some(term => text.includes(term));
         }
 
-        function matchesCategory(article, category) {
-            const text = `${article.title} ${article.description || ''}`.toLowerCase();
-            const filter = categoryFilters[category];
-            const hasRequired = filter.mustInclude.some(kw => text.includes(kw));
-            const hasExcluded = filter.mustExclude.some(kw => text.includes(kw));
-            return hasRequired && !hasExcluded;
+        function fingerprintTitle(title) {
+            const stopWords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','its','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','into','over','under','then','when','where','how','all','both','each','more','most','other','some','such','no','not','only','same','so','than','too','very','just','also','what','know','says','said']);
+            return new Set(
+                title.toLowerCase()
+                    .replace(/[^a-z0-9 ]/g, '')
+                    .split(' ')
+                    .filter(w => w.length > 3 && !stopWords.has(w))
+            );
         }
 
-        function getTitleFingerprint(title) {
-            const stopWords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','its','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','between','into','through','over','under','again','further','then','once','here','there','when','where','why','how','all','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','just','also']);
-            return title.toLowerCase()
-                .replace(/[^a-z0-9 ]/g, '')
-                .split(' ')
-                .filter(w => w.length > 3 && !stopWords.has(w))
-                .sort()
-                .join(' ');
-        }
-
-        function isSimilarTitle(titleA, titleB) {
-            const wordsA = new Set(getTitleFingerprint(titleA).split(' '));
-            const wordsB = new Set(getTitleFingerprint(titleB).split(' '));
+        function isSameStory(titleA, titleB) {
+            const wordsA = fingerprintTitle(titleA);
+            const wordsB = fingerprintTitle(titleB);
             if (wordsA.size === 0 || wordsB.size === 0) return false;
-            const intersection = [...wordsA].filter(w => wordsB.has(w));
-            const overlap = intersection.length / Math.min(wordsA.size, wordsB.size);
-            return overlap >= 0.5;
+            const overlap = [...wordsA].filter(w => wordsB.has(w)).length;
+            return overlap / Math.min(wordsA.size, wordsB.size) >= 0.5;
         }
 
-        function generateInsight(article, category) {
+        function generateInsight(article) {
             const text = `${article.title} ${article.excerpt}`.toLowerCase();
             const insightMap = [
+                { keywords: ['settlement', 'fine', 'penalty', 'lawsuit', 'antitrust', 'legal', 'court'], insight: 'Legal and regulatory exposure creates reputational risk and can constrain SIE\'s ability to pursue future M&A.' },
+                { keywords: ['impairment', 'write-down', 'writedown', 'write off'], insight: 'An impairment charge signals that the acquired asset has underperformed expectations, raising questions about SIE\'s M&A due diligence process.' },
+                { keywords: ['bungie'], insight: 'Bungie\'s performance is a bellwether for SIE\'s live service strategy — underperformance here puts the broader services growth thesis at risk.' },
+                { keywords: ['layoff', 'layoffs', 'restructur', 'job cut', 'redundan'], insight: 'Workforce reductions signal a reset in investment priorities and may delay upcoming title or service launches.' },
+                { keywords: ['acquisition', 'acquires', 'acquired', 'merger'], insight: 'Studio acquisitions expand SIE\'s first-party pipeline but require disciplined integration to avoid the value destruction seen in other gaming M&A.' },
+                { keywords: ['earnings', 'revenue', 'profit', 'quarterly', 'financial results'], insight: 'Financial results reveal the health of SIE\'s hardware, software, and services mix — the key indicator for strategic resource allocation.' },
+                { keywords: ['ceo', 'chief executive', 'president', 'leadership', 'appoint', 'resign'], insight: 'Leadership transitions introduce strategic uncertainty and may shift platform, content, or services investment priorities.' },
+                { keywords: ['partnership', 'deal', 'agreement', 'collaborat'], insight: 'Strategic partnerships can fill content or technology gaps without the full capital commitment of an acquisition.' },
                 { keywords: ['price', 'cut', 'discount', 'cheaper'], insight: 'A price reduction could accelerate PS5 adoption and expand the addressable market ahead of the next console generation.' },
-                { keywords: ['sales', 'units', 'shipped', 'sold'], insight: 'Hardware unit sales directly signal console install base growth, which underpins software and services revenue.' },
-                { keywords: ['supply', 'stock', 'shortage', 'available'], insight: 'Supply constraints limit revenue potential and push consumers toward competing platforms.' },
-                { keywords: ['pro', 'upgrade', 'revision', 'new model'], insight: 'A hardware refresh at mid-cycle can re-energize the install base and drive attach rate for premium titles.' },
-                { keywords: ['chip', 'processor', 'gpu', 'performance', 'specs'], insight: 'Advances in processing power directly impact game fidelity and SIE\'s competitive differentiation versus Xbox and PC.' },
-                { keywords: ['exclusive', 'first-party', 'first party'], insight: 'Exclusive content remains SIE\'s primary lever for driving console preference and reducing platform churn.' },
-                { keywords: ['acquisition', 'acquires', 'studio', 'buys'], insight: 'Studio acquisitions expand SIE\'s first-party content pipeline and reduce dependence on third-party exclusivity deals.' },
-                { keywords: ['delay', 'delayed', 'postponed', 'pushed back'], insight: 'Title delays create gaps in the release calendar that can suppress hardware sales and subscriber engagement.' },
-                { keywords: ['launch', 'release', 'released', 'out now'], insight: 'New title launches drive hardware attach rates and short-term subscription acquisition spikes.' },
-                { keywords: ['review', 'score', 'rated', 'metacritic'], insight: 'Critical reception directly influences long-tail sales and reinforces SIE\'s reputation for quality first-party content.' },
-                { keywords: ['pc', 'steam', 'windows', 'port'], insight: 'PC ports monetize existing IP beyond the console install base, though timing must be managed to protect hardware sales incentives.' },
-                { keywords: ['subscriber', 'subscribers', 'membership', 'members'], insight: 'Subscriber count is SIE\'s key recurring revenue metric and a leading indicator of platform stickiness.' },
-                { keywords: ['tier', 'premium', 'essential', 'extra'], insight: 'Tier mix shifts signal how well SIE is monetizing its subscriber base beyond the base subscription level.' },
-                { keywords: ['catalog', 'library', 'free game', 'monthly game'], insight: 'Catalog depth and monthly title quality are the primary drivers of PS+ upgrade and retention behavior.' },
-                { keywords: ['outage', 'down', 'server', 'maintenance'], insight: 'Service disruptions directly impact user trust and increase churn risk, particularly among higher-tier subscribers.' },
-                { keywords: ['cloud', 'streaming', 'remote play'], insight: 'Cloud gaming expansion broadens SIE\'s serviceable market beyond console owners and competes directly with Xbox Game Pass Ultimate.' },
-                { keywords: ['revenue', 'earnings', 'profit', 'financial', 'results', 'quarterly'], insight: 'Financial performance reflects the health of SIE\'s hardware, software, and services mix.' },
-                { keywords: ['layoff', 'layoffs', 'restructur', 'headcount'], insight: 'Workforce reductions signal a shift in investment priorities and may impact upcoming title pipelines.' },
-                { keywords: ['partnership', 'deal', 'agreement', 'collaborat'], insight: 'Strategic partnerships can fill content gaps or expand platform reach without the capital cost of acquisition.' },
-                { keywords: ['ceo', 'executive', 'leadership', 'president', 'appoint'], insight: 'Leadership changes introduce strategic uncertainty and may signal shifts in platform or content investment direction.' },
-                { keywords: ['market share', 'competitor', 'competition'], insight: 'Competitive dynamics in the console market directly affect SIE\'s pricing power and content investment returns.' },
-                { keywords: ['fine', 'lawsuit', 'legal', 'court', 'regulator', 'antitrust'], insight: 'Regulatory or legal exposure can constrain M&A activity and create reputational risk for the PlayStation brand.' }
+                { keywords: ['sales', 'units', 'shipped', 'sold'], insight: 'Hardware unit sales signal install base growth, which directly underpins software attach and services subscription revenue.' },
+                { keywords: ['ps5 pro', 'hardware refresh', 'new model', 'revision'], insight: 'A mid-cycle hardware refresh can re-energize the install base and create a new attach rate opportunity for premium titles.' },
+                { keywords: ['exclusive', 'first-party', 'first party'], insight: 'Exclusive content is SIE\'s primary differentiator — it drives console preference and reduces platform churn.' },
+                { keywords: ['delay', 'delayed', 'postponed'], insight: 'Title delays create release calendar gaps that can suppress hardware sales and slow subscriber acquisition.' },
+                { keywords: ['launch', 'release', 'released', 'out now'], insight: 'New title launches are short-term drivers of hardware attach rates and PS+ subscriber spikes.' },
+                { keywords: ['playstation plus', 'ps plus', 'subscriber', 'subscription', 'ps+'], insight: 'PS+ subscriber growth and tier mix are SIE\'s key recurring revenue indicators and a measure of platform stickiness.' },
+                { keywords: ['psn', 'outage', 'server', 'network down'], insight: 'Service disruptions erode user trust and increase churn risk, particularly among higher-paying PS+ tier subscribers.' },
+                { keywords: ['cloud', 'streaming', 'remote play'], insight: 'Cloud gaming expands SIE\'s serviceable market beyond console owners and is a direct competitive response to Xbox Game Pass.' },
+                { keywords: ['pc', 'steam', 'windows', 'port'], insight: 'PC ports monetize existing IP beyond the console base, though release timing must be managed to protect hardware sales incentives.' }
             ];
             for (const entry of insightMap) {
                 if (entry.keywords.some(kw => text.includes(kw))) return entry.insight;
@@ -320,15 +251,8 @@
             document.getElementById('status-text').textContent = text;
             document.getElementById('status-dot').className = 'status-dot ' + (type === 'loading' ? 'loading' : type === 'error' ? 'error' : '');
         }
-
-        function showError(message) {
-            document.getElementById('error-container').innerHTML = `<div class="error-message">${message}</div>`;
-        }
-
-        function clearMessages() {
-            document.getElementById('error-container').innerHTML = '';
-        }
-
+        function showError(msg) { document.getElementById('error-container').innerHTML = `<div class="error-message">${msg}</div>`; }
+        function clearMessages() { document.getElementById('error-container').innerHTML = ''; }
         function updateTimestamp() {
             document.getElementById('timestamp').textContent = new Date().toLocaleString('en-US', {
                 month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -349,71 +273,6 @@
             }
         }
 
-        async function fetchCategory(queries, seenUrls, seenTitles, category) {
-            for (const query of queries) {
-                try {
-                    const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
-                    const apiData = await fetchWithProxy(apiUrl);
-                    if (apiData.status === 'error') { console.error('API error:', apiData.message); continue; }
-                    if (apiData.articles && apiData.articles.length > 0) {
-                        const filtered = apiData.articles.filter(a => {
-                            if (!a.url || seenUrls.has(a.url)) return false;
-                            if (!isSonyRelevant(a)) return false;
-                            if (!matchesCategory(a, category)) return false;
-                            if ([...seenTitles].some(t => isSimilarTitle(t, a.title))) return false;
-                            return true;
-                        });
-                        if (filtered.length >= 2) {
-                            const toAdd = filtered.slice(0, 8);
-                            toAdd.forEach(a => { seenUrls.add(a.url); seenTitles.add(a.title); });
-                            return toAdd.map(a => ({
-                                title: a.title,
-                                source: a.source.name,
-                                date: formatDate(a.publishedAt),
-                                excerpt: a.description || 'No description available',
-                                url: a.url,
-                                whyItMatters: generateInsight({ title: a.title, excerpt: a.description || '' }, category)
-                            }));
-                        }
-                    }
-                } catch (e) { console.error(`Query "${query}" failed:`, e); }
-            }
-            return [];
-        }
-
-        async function refreshNews() {
-            clearMessages();
-            setStatus('Fetching articles...', 'loading');
-            const btn = document.getElementById('refresh-btn');
-            btn.disabled = true;
-            try {
-                const categorized = { hardware: [], games: [], network: [], corporate: [] };
-                const seenUrls = new Set();
-                const seenTitles = new Set();
-                let hasArticles = false;
-                for (const item of searchQueries) {
-                    const articles = await fetchCategory(item.queries, seenUrls, seenTitles, item.category);
-                    if (articles.length > 0) { hasArticles = true; categorized[item.category] = articles; }
-                }
-                if (!hasArticles) {
-                    showError('No articles found. Please try refreshing again.');
-                    setStatus('No articles', 'error');
-                    btn.disabled = false;
-                    return;
-                }
-                allArticles = categorized;
-                renderArticles(document.getElementById('filter').value);
-                updateTimestamp();
-                setStatus('Updated', 'ready');
-            } catch (error) {
-                console.error('Error:', error);
-                showError(`Error loading news: ${error.message}. Please try again.`);
-                setStatus('Error', 'error');
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
         function formatDate(dateString) {
             try {
                 const date = new Date(dateString);
@@ -430,16 +289,87 @@
             } catch (e) { return 'Recently'; }
         }
 
+        async function refreshNews() {
+            clearMessages();
+            setStatus('Fetching articles...', 'loading');
+            const btn = document.getElementById('refresh-btn');
+            btn.disabled = true;
+
+            try {
+                const seenUrls = new Set();
+                const seenTitles = [];
+                const rawPool = [];
+
+                for (const item of searchQueries) {
+                    for (const query of item.queries) {
+                        try {
+                            const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
+                            const apiData = await fetchWithProxy(apiUrl);
+                            if (apiData.status === 'error') { console.error('API error:', apiData.message); continue; }
+                            if (apiData.articles) {
+                                for (const a of apiData.articles) {
+                                    if (!a.url || seenUrls.has(a.url)) continue;
+                                    if (!isSonyRelevant(a)) continue;
+                                    if (seenTitles.some(t => isSameStory(t, a.title))) continue;
+                                    seenUrls.add(a.url);
+                                    seenTitles.push(a.title);
+                                    rawPool.push(a);
+                                }
+                            }
+                        } catch (e) { console.error(`Query "${query}" failed:`, e); }
+                    }
+                }
+
+                const categorized = { hardware: [], games: [], network: [], corporate: [] };
+
+                for (const a of rawPool) {
+                    const category = assignCategory(a);
+                    if (category && categorized[category].length < 8) {
+                        categorized[category].push({
+                            title: a.title,
+                            source: a.source.name,
+                            date: formatDate(a.publishedAt),
+                            excerpt: a.description || 'No description available',
+                            url: a.url,
+                            whyItMatters: generateInsight({ title: a.title, excerpt: a.description || '' })
+                        });
+                    }
+                }
+
+                const hasArticles = Object.values(categorized).some(arr => arr.length > 0);
+                if (!hasArticles) {
+                    showError('No articles found. Please try refreshing again.');
+                    setStatus('No articles', 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                allArticles = categorized;
+                renderArticles(document.getElementById('filter').value);
+                updateTimestamp();
+                setStatus('Updated', 'ready');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Error loading news: ${error.message}. Please try again.`);
+                setStatus('Error', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
         function renderArticles(filter = '') {
             const container = document.getElementById('articles');
             container.innerHTML = '';
             const unitKeys = ['hardware', 'games', 'network', 'corporate'];
             const toShow = filter ? unitKeys.filter(k => k === filter) : unitKeys;
+
             toShow.forEach(key => {
                 const unit = businessUnits[key];
                 const articles = allArticles[key] || [];
                 const card = document.createElement('div');
                 card.className = 'category-card';
+
                 const headerEl = document.createElement('div');
                 headerEl.className = 'category-header';
                 headerEl.innerHTML = `
@@ -448,8 +378,10 @@
                     <p class="strategic-focus">${unit.strategicFocus}</p>
                 `;
                 card.appendChild(headerEl);
+
                 const list = document.createElement('div');
                 list.className = 'article-list';
+
                 if (articles.length === 0) {
                     list.innerHTML = '<div class="empty">No articles found for this category</div>';
                 } else {
@@ -472,6 +404,7 @@
                         list.appendChild(el);
                     });
                 }
+
                 card.appendChild(list);
                 container.appendChild(card);
             });
