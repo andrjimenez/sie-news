@@ -59,6 +59,7 @@
         .business-impact { background: #f0f4ff; border-left: 3px solid #000080; padding: 0.75rem; border-radius: 2px; margin-bottom: 0.75rem; font-size: 0.8rem; line-height: 1.6; }
         .business-impact strong { color: #000080; display: block; margin-bottom: 0.3rem; }
         .business-impact .impact-text { color: #333333; font-style: italic; }
+        .impact-loading { color: #aaaaaa; font-style: italic; animation: pulse 1.5s infinite; }
         .article-link { font-size: 0.8rem; color: #000080; text-decoration: none; font-weight: 600; }
         .article-link:hover { color: #0000b3; text-decoration: underline; }
         .empty { padding: 2rem; text-align: center; color: #999999; font-size: 0.9rem; }
@@ -112,57 +113,72 @@
             hardware: {
                 label: 'Hardware',
                 description: 'Console Hardware, Devices & Technology',
-                strategicFocus: 'PS5, PS5 Pro, console lifecycle, technical innovation'
+                strategicFocus: 'PS5, PS5 Pro, DualSense, console specs, hardware sales'
             },
             games: {
                 label: 'Games',
-                description: 'Game Releases, Studios & Content',
-                strategicFocus: 'Exclusive titles, studio news, game launches, gameplay'
+                description: 'SIE Exclusive Titles, Studios & Game Launches',
+                strategicFocus: 'SIE exclusives, first-party studios, game launches, gameplay'
             },
             network: {
                 label: 'Network & PS+',
-                description: 'PlayStation Plus, Online Services & Subscriptions',
-                strategicFocus: 'PS+ tiers, subscribers, PSN, online services'
+                description: 'PlayStation Plus & Online Services',
+                strategicFocus: 'PS+ tiers, subscribers, PSN, online infrastructure'
             },
             corporate: {
                 label: 'Corporate',
-                description: 'Financial Performance, M&A, Legal & Strategy',
-                strategicFocus: 'Earnings, acquisitions, legal, partnerships, leadership'
+                description: 'Earnings, M&A, Legal & Leadership',
+                strategicFocus: 'Financial results, acquisitions, legal, partnerships, executive news'
             }
         };
 
         const CORPORATE_SIGNALS = [
-            'earnings', 'revenue', 'profit', 'loss', 'financial results', 'quarterly',
+            'earnings', 'quarterly results', 'financial results', 'annual report',
+            'revenue', 'profit', 'operating loss', 'net income', 'operating income',
+            'fiscal year', 'fiscal quarter', 'guidance', 'forecast', 'valuation',
+            'stock price', 'share price', 'investor', 'shareholder', 'ipo', 'buyout',
             'acquisition', 'acquires', 'acquired', 'merger', 'takeover',
-            'layoff', 'layoffs', 'redundan', 'restructur', 'job cut',
-            'settlement', 'lawsuit', 'legal', 'court', 'fine', 'penalty', 'regulator', 'antitrust',
-            'impairment', 'write-down', 'writedown', 'write off',
-            'ceo', 'chief executive', 'president', 'executive', 'appoint', 'resign', 'leadership',
-            'investor', 'shareholder', 'market share', 'stock price', 'ipo',
-            'partnership', 'strategic deal', 'agreement', 'collaborat',
-            'bungie', 'haven studios', 'insomniac', 'naughty dog', 'santa monica',
-            'guerrilla games', 'sucker punch', 'media molecule', 'firesprite',
-            'class action', 'litigation', 'pay customers', 'pay users',
-            'operating income', 'net income', 'fiscal', 'buyout', 'valuation'
+            'layoff', 'layoffs', 'job cuts', 'redundancies', 'restructuring', 'reorg',
+            'class action', 'antitrust', 'litigation', 'settlement agreement',
+            'regulatory fine', 'pay $', 'pay million', 'pay billion',
+            'playstation store fine', 'playstation store settlement',
+            'impairment charge', 'write-down', 'writedown',
+            'ceo', 'chief executive', 'chief financial officer', 'cfo',
+            'chairman', 'appointed as', 'steps down', 'resigns as', 'named president',
+            'strategic partnership', 'strategic alliance', 'licensing agreement',
+            'joint venture', 'multi-year deal', 'content deal',
+            'bungie', 'haven studios', 'insomniac games', 'naughty dog',
+            'santa monica studio', 'guerrilla games', 'sucker punch', 'media molecule',
+            'firesprite', 'bluepoint', 'housemarque', 'nixxes'
         ];
 
         const HARDWARE_SIGNALS = [
-            'ps5 pro', 'playstation 5', 'ps5', 'dualsense', 'console hardware',
-            'playstation hardware', 'next-gen console', 'sony console',
-            'psvr', 'playstation vr', 'specs', 'teraflop', 'ssd speed'
+            'ps5 pro', 'playstation 5', 'ps5 console', 'dualsense',
+            'playstation vr', 'psvr2', 'psvr 2',
+            'console hardware', 'console specs', 'console sales',
+            'playstation hardware', 'sony console',
+            'ssd speed', 'ray tracing', 'teraflop'
         ];
 
         const NETWORK_SIGNALS = [
-            'playstation plus', 'ps plus', 'psn', 'playstation network',
-            'ps now', 'playstation now', 'ps+ subscribers', 'cloud gaming playstation',
-            'online service playstation', 'playstation subscription'
+            'playstation plus', 'ps plus', 'ps+ ',
+            'playstation network', 'psn outage', 'psn down',
+            'playstation now', 'ps now',
+            'playstation subscription', 'ps+ subscribers',
+            'playstation online', 'online service playstation',
+            'cloud gaming playstation', 'playstation streaming'
         ];
 
         const GAMES_SIGNALS = [
-            'game', 'games', 'title', 'exclusive', 'dlc', 'expansion',
-            'sequel', 'gameplay', 'release date', 'game launch', 'game studio',
-            'developer', 'game trailer', 'game preview', 'game review',
-            'playstation game', 'sony game'
+            'playstation exclusive', 'ps5 exclusive', 'sony exclusive',
+            'first-party game', 'first party game',
+            'playstation studios', 'sony santa monica', 'naughty dog game',
+            'insomniac game', 'guerrilla game', 'sucker punch game',
+            'god of war', 'spider-man', 'horizon', 'the last of us', 'ghost of tsushima',
+            'gran turismo', 'ratchet and clank', 'sackboy', 'returnal', 'demon\'s souls',
+            'playstation game', 'sony game',
+            'game reveal', 'game trailer', 'game preview', 'game review',
+            'game launch playstation', 'release playstation', 'gameplay playstation'
         ];
 
         function assignCategory(article) {
@@ -176,29 +192,34 @@
 
         const searchQueries = [
             { category: 'corporate', queries: [
-                'Sony Interactive Entertainment financial earnings',
-                'Sony PlayStation acquisition lawsuit settlement',
-                'Sony gaming impairment layoff restructure bungie',
-                'Sony PlayStation settlement fine refund customers'
+                'Sony Interactive Entertainment financial earnings quarterly',
+                'Sony PlayStation acquisition lawsuit settlement fine',
+                'Sony gaming layoff restructure impairment bungie',
+                'Sony PlayStation class action antitrust settlement'
             ]},
             { category: 'hardware', queries: [
-                'PlayStation 5 PS5 hardware console',
-                'PS5 Pro Sony specs performance',
-                'PlayStation console sales hardware'
+                'PlayStation 5 PS5 console hardware sales',
+                'PS5 Pro DualSense specs performance',
+                'Sony PlayStation console hardware announcement'
             ]},
             { category: 'games', queries: [
-                'PlayStation exclusive game release',
-                'Sony PlayStation game announcement launch',
-                'PlayStation studio game title'
+                'PlayStation exclusive game release SIE',
+                'Sony first party game studio announcement',
+                'God of War Horizon Spider-Man PlayStation game'
             ]},
             { category: 'network', queries: [
-                'PlayStation Plus PS+ subscription Sony',
+                'PlayStation Plus PS+ subscription tier Sony',
                 'PlayStation Network PSN online service',
-                'PS Plus subscribers tier Sony'
+                'PS Plus subscribers growth Sony'
             ]}
         ];
 
-        const SONY_TERMS = ['sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie', 'ps plus', 'playstation plus', 'bungie', 'insomniac', 'naughty dog'];
+        const SONY_TERMS = [
+            'sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie',
+            'ps plus', 'playstation plus', 'playstation studios',
+            'bungie', 'insomniac', 'naughty dog', 'santa monica',
+            'guerrilla', 'sucker punch', 'housemarque', 'bluepoint'
+        ];
 
         function isSonyRelevant(article) {
             const text = `${article.title} ${article.description || ''}`.toLowerCase();
@@ -223,32 +244,49 @@
             return overlap / Math.min(wordsA.size, wordsB.size) >= 0.6;
         }
 
-        function generateInsight(article) {
-            const text = `${article.title} ${article.excerpt}`.toLowerCase();
-            const insightMap = [
-                { keywords: ['settlement', 'fine', 'penalty', 'lawsuit', 'antitrust', 'legal', 'court'], insight: 'Legal and regulatory exposure creates reputational risk and can constrain SIE\'s ability to pursue future M&A.' },
-                { keywords: ['impairment', 'write-down', 'writedown', 'write off'], insight: 'An impairment charge signals that the acquired asset has underperformed expectations, raising questions about SIE\'s M&A due diligence process.' },
-                { keywords: ['bungie'], insight: 'Bungie\'s performance is a bellwether for SIE\'s live service strategy — underperformance here puts the broader services growth thesis at risk.' },
-                { keywords: ['layoff', 'layoffs', 'restructur', 'job cut', 'redundan'], insight: 'Workforce reductions signal a reset in investment priorities and may delay upcoming title or service launches.' },
-                { keywords: ['acquisition', 'acquires', 'acquired', 'merger'], insight: 'Studio acquisitions expand SIE\'s first-party pipeline but require disciplined integration to avoid the value destruction seen in other gaming M&A.' },
-                { keywords: ['earnings', 'revenue', 'profit', 'quarterly', 'financial results'], insight: 'Financial results reveal the health of SIE\'s hardware, software, and services mix — the key indicator for strategic resource allocation.' },
-                { keywords: ['ceo', 'chief executive', 'president', 'leadership', 'appoint', 'resign'], insight: 'Leadership transitions introduce strategic uncertainty and may shift platform, content, or services investment priorities.' },
-                { keywords: ['partnership', 'deal', 'agreement', 'collaborat'], insight: 'Strategic partnerships can fill content or technology gaps without the full capital commitment of an acquisition.' },
-                { keywords: ['price', 'cut', 'discount', 'cheaper'], insight: 'A price reduction could accelerate PS5 adoption and expand the addressable market ahead of the next console generation.' },
-                { keywords: ['sales', 'units', 'shipped', 'sold'], insight: 'Hardware unit sales signal install base growth, which directly underpins software attach and services subscription revenue.' },
-                { keywords: ['ps5 pro', 'hardware refresh', 'new model', 'revision'], insight: 'A mid-cycle hardware refresh can re-energize the install base and create a new attach rate opportunity for premium titles.' },
-                { keywords: ['exclusive', 'first-party', 'first party'], insight: 'Exclusive content is SIE\'s primary differentiator — it drives console preference and reduces platform churn.' },
-                { keywords: ['delay', 'delayed', 'postponed'], insight: 'Title delays create release calendar gaps that can suppress hardware sales and slow subscriber acquisition.' },
-                { keywords: ['launch', 'release', 'released', 'out now'], insight: 'New title launches are short-term drivers of hardware attach rates and PS+ subscriber spikes.' },
-                { keywords: ['playstation plus', 'ps plus', 'subscriber', 'subscription', 'ps+'], insight: 'PS+ subscriber growth and tier mix are SIE\'s key recurring revenue indicators and a measure of platform stickiness.' },
-                { keywords: ['psn', 'outage', 'server', 'network down'], insight: 'Service disruptions erode user trust and increase churn risk, particularly among higher-paying PS+ tier subscribers.' },
-                { keywords: ['cloud', 'streaming', 'remote play'], insight: 'Cloud gaming expands SIE\'s serviceable market beyond console owners and is a direct competitive response to Xbox Game Pass.' },
-                { keywords: ['pc', 'steam', 'windows', 'port'], insight: 'PC ports monetize existing IP beyond the console base, though release timing must be managed to protect hardware sales incentives.' }
-            ];
-            for (const entry of insightMap) {
-                if (entry.keywords.some(kw => text.includes(kw))) return entry.insight;
+        async function generateInsightsForCategory(articles, categoryLabel, categoryContext) {
+            if (articles.length === 0) return articles;
+
+            const prompt = `You are a strategic analyst supporting a consulting team working with Sony Interactive Entertainment (SIE).
+
+For each article below, write a single concise sentence explaining WHY it matters specifically to SIE's ${categoryLabel} business.
+The insight must be directly grounded in what the article is actually about — do not give generic statements.
+Category context: ${categoryContext}
+
+Articles:
+${articles.map((a, i) => `[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt}`).join('\n\n')}
+
+Respond ONLY with a JSON array of objects with keys "index" (number) and "insight" (string).
+Example: [{"index":0,"insight":"..."},{"index":1,"insight":"..."}]
+No markdown, no explanation, JSON only.`;
+
+            try {
+                const claudeUrl = 'https://api.anthropic.com/v1/messages';
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(claudeUrl);
+
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data.content?.[0]?.text || '[]';
+                const results = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+                return articles.map((a, i) => {
+                    const match = results.find(r => r.index === i);
+                    return { ...a, whyItMatters: match?.insight || null };
+                });
+
+            } catch (e) {
+                console.error('Claude insight generation failed:', e);
+                return articles.map(a => ({ ...a, whyItMatters: null }));
             }
-            return null;
         }
 
         function setStatus(text, type = 'ready') {
@@ -320,12 +358,11 @@
                                     rawPool.push(a);
                                 }
                             }
-                        } catch (e) { console.error(`Query "${query}" failed:`, e); }
+                        } catch (e) { console.error(`Query failed:`, e); }
                     }
                 }
 
                 const categorized = { hardware: [], games: [], network: [], corporate: [] };
-
                 for (const a of rawPool) {
                     const category = assignCategory(a);
                     if (category && categorized[category].length < 8) {
@@ -335,7 +372,7 @@
                             date: formatDate(a.publishedAt),
                             excerpt: a.description || 'No description available',
                             url: a.url,
-                            whyItMatters: generateInsight({ title: a.title, excerpt: a.description || '' })
+                            whyItMatters: null
                         });
                     }
                 }
@@ -349,8 +386,29 @@
                 }
 
                 allArticles = categorized;
-                renderArticles(document.getElementById('filter').value);
+                renderArticles(document.getElementById('filter').value, true);
                 updateTimestamp();
+                setStatus('Generating insights...', 'loading');
+
+                const categoryContexts = {
+                    hardware: 'PS5/PS5 Pro hardware, DualSense, console specs, hardware sales and lifecycle',
+                    games: 'SIE exclusive titles, first-party studios, game launches, gameplay announcements',
+                    network: 'PlayStation Plus subscriptions, PSN online services, subscriber growth',
+                    corporate: 'SIE earnings, M&A activity, legal matters, executive leadership, partnerships'
+                };
+
+                for (const key of Object.keys(categorized)) {
+                    if (categorized[key].length > 0) {
+                        categorized[key] = await generateInsightsForCategory(
+                            categorized[key],
+                            businessUnits[key].label,
+                            categoryContexts[key]
+                        );
+                    }
+                }
+
+                allArticles = categorized;
+                renderArticles(document.getElementById('filter').value, false);
                 setStatus('Updated', 'ready');
 
             } catch (error) {
@@ -362,7 +420,7 @@
             }
         }
 
-        function renderArticles(filter = '') {
+        function renderArticles(filter = '', loading = false) {
             const container = document.getElementById('articles');
             container.innerHTML = '';
             const unitKeys = ['hardware', 'games', 'network', 'corporate'];
@@ -392,17 +450,20 @@
                     articles.forEach(article => {
                         const el = document.createElement('div');
                         el.className = 'article';
+
+                        const impactHtml = loading
+                            ? `<div class="business-impact"><strong>Why it Matters:</strong><span class="impact-loading">Generating insight...</span></div>`
+                            : article.whyItMatters
+                                ? `<div class="business-impact"><strong>Why it Matters:</strong><span class="impact-text">${article.whyItMatters}</span></div>`
+                                : '';
+
                         el.innerHTML = `
                             <a class="article-title" href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a>
                             <div class="article-meta">
                                 <span class="article-source">${article.source}</span> · ${article.date}
                             </div>
                             <div class="article-excerpt">${article.excerpt.substring(0, 150)}${article.excerpt.length > 150 ? '...' : ''}</div>
-                            ${article.whyItMatters ? `
-                            <div class="business-impact">
-                                <strong>Why it Matters:</strong>
-                                <span class="impact-text">${article.whyItMatters}</span>
-                            </div>` : ''}
+                            ${impactHtml}
                             <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="article-link">Read full article →</a>
                         `;
                         list.appendChild(el);
