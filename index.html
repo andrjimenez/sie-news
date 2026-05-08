@@ -236,11 +236,13 @@
             }
         };
 
+        // Each category has multiple fallback queries
+        // If the first query doesn't return enough unique articles, tries the next
         const searchQueries = [
-            { category: 'hardware', query: 'PS5 console hardware PlayStation' },
-            { category: 'games', query: 'PlayStation game release exclusive' },
-            { category: 'network', query: 'PlayStation Plus subscription' },
-            { category: 'corporate', query: 'Sony Interactive Entertainment earnings' }
+            { category: 'hardware', queries: ['PS5 hardware', 'PlayStation console', 'Sony gaming hardware'] },
+            { category: 'games', queries: ['PlayStation games', 'Sony game release', 'PlayStation studio'] },
+            { category: 'network', queries: ['PlayStation Plus', 'PSN network', 'PlayStation subscription'] },
+            { category: 'corporate', queries: ['Sony gaming earnings', 'Sony Interactive', 'Sony financial results'] }
         ];
 
         function setStatus(text, type = 'ready') {
@@ -276,6 +278,38 @@
             }
         }
 
+        async function fetchCategory(queries, seenUrls) {
+            for (const query of queries) {
+                try {
+                    const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${API_KEY}`;
+                    const apiData = await fetchWithProxy(apiUrl);
+
+                    if (apiData.status === 'error') {
+                        console.error('API error:', apiData.message);
+                        continue;
+                    }
+
+                    if (apiData.articles && apiData.articles.length > 0) {
+                        const unique = apiData.articles.filter(a => a.url && !seenUrls.has(a.url));
+                        if (unique.length >= 3) {
+                            const toAdd = unique.slice(0, 8);
+                            toAdd.forEach(a => seenUrls.add(a.url));
+                            return toAdd.map(a => ({
+                                title: a.title,
+                                source: a.source.name,
+                                date: formatDate(a.publishedAt),
+                                excerpt: a.description || 'No description available',
+                                url: a.url
+                            }));
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Query "${query}" failed:`, e);
+                }
+            }
+            return [];
+        }
+
         async function refreshNews() {
             clearMessages();
             setStatus('Fetching insights...', 'loading');
@@ -288,35 +322,10 @@
                 let hasArticles = false;
 
                 for (const item of searchQueries) {
-                    try {
-                        const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(item.query)}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${API_KEY}`;
-                        const apiData = await fetchWithProxy(apiUrl);
-
-                        if (apiData.status === 'error') {
-                            showError(`API Error: ${apiData.message}`);
-                            setStatus('API Error', 'error');
-                            btn.disabled = false;
-                            return;
-                        }
-
-                        if (apiData.articles && apiData.articles.length > 0) {
-                            const uniqueArticles = apiData.articles.filter(article => !seenUrls.has(article.url));
-                            const articlesToAdd = uniqueArticles.slice(0, 8);
-                            articlesToAdd.forEach(article => seenUrls.add(article.url));
-
-                            if (articlesToAdd.length > 0) {
-                                hasArticles = true;
-                                categorized[item.category] = articlesToAdd.map(article => ({
-                                    title: article.title,
-                                    source: article.source.name,
-                                    date: formatDate(article.publishedAt),
-                                    excerpt: article.description || 'No description available',
-                                    url: article.url
-                                }));
-                            }
-                        }
-                    } catch (e) {
-                        console.error(`Error fetching ${item.category}:`, e);
+                    const articles = await fetchCategory(item.queries, seenUrls);
+                    if (articles.length > 0) {
+                        hasArticles = true;
+                        categorized[item.category] = articles;
                     }
                 }
 
@@ -384,7 +393,7 @@
                 list.className = 'article-list';
 
                 if (articles.length === 0) {
-                    list.innerHTML = '<div class="empty">No articles found</div>';
+                    list.innerHTML = '<div class="empty">No articles found for this category</div>';
                 } else {
                     articles.forEach(article => {
                         const el = document.createElement('div');
