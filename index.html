@@ -13,6 +13,7 @@
             --navy-mid:    #002080;
             --navy-light:  #0a2db3;
             --accent:      #e8f0fe;
+            --accent-bright: #4f7cff;
             --white:       #ffffff;
             --off-white:   #f7f8fc;
             --gray-100:    #f0f2f8;
@@ -23,6 +24,7 @@
             --text:        #0d1126;
             --red:         #e53935;
             --orange:      #f57c00;
+            --green:       #2e7d32;
             --font-sans:   'IBM Plex Sans', sans-serif;
             --font-mono:   'IBM Plex Mono', monospace;
             --radius-sm:   4px;
@@ -30,6 +32,7 @@
             --radius-lg:   12px;
             --shadow-sm:   0 1px 3px rgba(0,21,90,0.08), 0 1px 2px rgba(0,21,90,0.06);
             --shadow-md:   0 4px 12px rgba(0,21,90,0.10), 0 2px 4px rgba(0,21,90,0.06);
+            --shadow-lg:   0 8px 24px rgba(0,21,90,0.12), 0 4px 8px rgba(0,21,90,0.08);
             --transition:  150ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -59,9 +62,9 @@
             gap: 2rem;
         }
 
-        .brand { display: flex; flex-direction: column; gap: 1px; }
-        .brand-name { font-family: var(--font-mono); font-weight: 600; font-size: 0.85rem; color: var(--white); letter-spacing: 0.08em; text-transform: uppercase; }
-        .brand-sub { font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; font-family: var(--font-mono); }
+        .brand { display: flex; flex-direction: column; gap: 2px; }
+        .brand-name { font-family: var(--font-sans); font-weight: 700; font-size: 1.15rem; color: var(--white); letter-spacing: 0.01em; }
+        .brand-sub { font-size: 0.78rem; color: rgba(255,255,255,0.5); font-family: var(--font-sans); font-weight: 400; }
 
         .header-controls { display: flex; align-items: center; gap: 1rem; }
 
@@ -114,7 +117,6 @@
         .btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-refresh .icon { display: inline-block; font-size: 1rem; line-height: 1; }
         .btn-refresh.spinning .icon { animation: spin 1s linear infinite; }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .error-banner {
@@ -140,7 +142,7 @@
         }
         .card-header-left { flex: 1; min-width: 0; }
         .card-category-label { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy-light); margin-bottom: 0.25rem; }
-        .card-title { font-size: 0.95rem; font-weight: 600; color: var(--gray-800); line-height: 1.3; }
+        .card-title { font-size: 1rem; font-weight: 600; color: var(--gray-800); line-height: 1.3; }
         .card-focus { font-size: 0.72rem; color: var(--gray-400); margin-top: 0.2rem; font-style: italic; }
 
         .card-badge {
@@ -164,14 +166,14 @@
         .meta-sep { color: var(--gray-200); font-size: 0.65rem; }
         .article-date { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); }
 
-        .article-title { display: block; font-size: 0.875rem; font-weight: 600; color: var(--text); line-height: 1.45; text-decoration: none; margin-bottom: 0.5rem; transition: color var(--transition); }
+        .article-title { display: block; font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.45; text-decoration: none; margin-bottom: 0.5rem; transition: color var(--transition); }
         .article-title:hover { color: var(--navy-light); }
 
-        .article-excerpt { font-size: 0.78rem; color: var(--gray-600); line-height: 1.55; margin-bottom: 0.6rem; }
+        .article-excerpt { font-size: 0.83rem; color: var(--gray-600); line-height: 1.55; margin-bottom: 0.6rem; }
 
         .insight-box { background: var(--accent); border-left: 3px solid var(--navy-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.55rem 0.75rem; margin-bottom: 0.6rem; }
         .insight-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy-mid); margin-bottom: 0.2rem; }
-        .insight-text { font-size: 0.775rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
+        .insight-text { font-size: 0.83rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
         .insight-loading { font-size: 0.75rem; color: var(--gray-400); font-style: italic; animation: blink 1.5s ease infinite; }
 
         .article-link { font-family: var(--font-mono); font-size: 0.68rem; color: var(--navy-light); text-decoration: none; font-weight: 600; letter-spacing: 0.02em; transition: color var(--transition); }
@@ -247,18 +249,41 @@
     const PROXIES = ['https://api.allorigins.win/get?url=', 'https://corsproxy.io/?'];
 
     const CATEGORIES = {
-        hardware:  { label: 'Hardware',       description: 'Console Hardware, Devices & Technology',      focus: 'PS5, PS5 Pro, DualSense, console specs, hardware sales' },
-        games:     { label: 'Games',          description: 'SIE Exclusive Titles, Studios & Launches',    focus: 'SIE exclusives, first-party studios, game launches, gameplay' },
-        network:   { label: 'Network & PS+',  description: 'PlayStation Plus & Online Services',          focus: 'PS+ tiers, subscribers, PSN, online infrastructure' },
-        corporate: { label: 'Corporate',      description: 'Earnings, M&A, Legal & Leadership',           focus: 'Financial results, acquisitions, legal, partnerships, executive news' },
-        industry:  { label: 'Industry',       description: 'Gaming Industry & Competitive Landscape',     focus: 'Xbox, Nintendo, market trends, publisher moves, gaming industry news' }
+        hardware:  { label: 'Hardware',      description: 'Console Hardware, Devices & Technology',   focus: 'PS5, PS5 Pro, DualSense, console specs, hardware sales' },
+        games:     { label: 'Games',         description: 'SIE Exclusive Titles, Studios & Launches', focus: 'SIE exclusives, first-party studios, game launches, gameplay' },
+        network:   { label: 'Network & PS+', description: 'PlayStation Plus & Online Services',       focus: 'PS+ tiers, subscribers, PSN, online infrastructure' },
+        corporate: { label: 'Corporate',     description: 'Earnings, M&A, Legal & Leadership',        focus: 'Financial results, acquisitions, legal, partnerships, executive news' },
+        industry:  { label: 'Industry',      description: 'Gaming Industry & Competitive Landscape',  focus: 'Xbox, Nintendo, market trends, publisher moves, gaming industry news' }
     };
 
-    const CORPORATE_SIGNALS = ['earnings','quarterly results','financial results','annual report','revenue','profit','operating loss','net income','operating income','fiscal year','fiscal quarter','guidance','forecast','valuation','stock price','share price','investor','shareholder','ipo','buyout','acquisition','acquires','acquired','merger','takeover','layoff','layoffs','job cuts','redundancies','restructuring','reorg','class action','antitrust','litigation','settlement agreement','regulatory fine','pay $','pay million','pay billion','playstation store fine','playstation store settlement','impairment charge','write-down','writedown','ceo','chief executive','chief financial officer','cfo','chairman','appointed as','steps down','resigns as','named president','strategic partnership','strategic alliance','licensing agreement','joint venture','multi-year deal','content deal','bungie','haven studios','insomniac games','naughty dog','santa monica studio','guerrilla games','sucker punch','media molecule','firesprite','bluepoint','housemarque','nixxes'];
-    const HARDWARE_SIGNALS  = ['ps5 pro','playstation 5','ps5 console','ps5 slim','dualsense','playstation vr','psvr2','psvr 2','console hardware','console specs','console sales','console price','playstation hardware','sony console','ps5 price','playstation price','ps5 stock','playstation stock','ps5 availability','ssd speed','ray tracing','teraflop','ps5 review','ps5 update'];
-    const NETWORK_SIGNALS   = ['playstation plus','ps plus','ps+ ','playstation network','psn outage','psn down','playstation now','ps now','playstation subscription','ps+ subscribers','playstation online','online service playstation','cloud gaming playstation','playstation streaming'];
-    const GAMES_SIGNALS     = ['playstation exclusive','ps5 exclusive','sony exclusive','first-party game','first party game','playstation studios','sony santa monica','naughty dog','insomniac','guerrilla games','sucker punch','housemarque','bluepoint','media molecule','god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','ratchet and clank','sackboy','returnal',"demon's souls",'astro bot','helldivers','until dawn','concord','fairgame','playstation game','sony game','ps5 game','ps4 game','game reveal','game trailer','game preview','game review','game launch playstation','release playstation','gameplay playstation','new playstation','playstation release','sony release','playstation title','sony title','playstation launch'];
-    const INDUSTRY_SIGNALS  = ['xbox','game pass','microsoft gaming','activision','bethesda','nintendo switch','nintendo direct','switch 2','gaming market','video game industry','gaming revenue','games industry','steam deck','valve','epic games','epic store','take-two','rockstar','ea games','electronic arts','ubisoft','square enix','capcom','sega','bandai namco','konami','game developers conference','gdc','summer game fest','the game awards','gaming stocks','gaming acquisitions','publisher'];
+    const CORPORATE_SIGNALS = [
+        'earnings','quarterly results','financial results','annual report',
+        'revenue','profit','operating loss','net income','operating income',
+        'fiscal year','fiscal quarter','guidance','forecast','valuation',
+        'stock price','share price','investor','shareholder','ipo','buyout',
+        'acquisition','acquires','acquired','merger','takeover',
+        'layoff','layoffs','job cuts','redundancies','restructuring','reorg',
+        'class action','antitrust','litigation','settlement agreement',
+        'regulatory fine','pay $','pay million','pay billion',
+        'playstation store fine','playstation store settlement',
+        'impairment charge','write-down','writedown',
+        'ceo','chief executive','chief financial officer','cfo',
+        'chairman','appointed as','steps down','resigns as','named president',
+        'strategic partnership','strategic alliance','licensing agreement',
+        'joint venture','multi-year deal','content deal',
+        'bungie','haven studios','insomniac games','naughty dog',
+        'santa monica studio','guerrilla games','sucker punch','media molecule',
+        'firesprite','bluepoint','housemarque','nixxes',
+        'marathon','bungie impairment','studio closure','game cancelled','concord shutdown'
+    ];
+
+    const HARDWARE_SIGNALS = ['ps5 pro','playstation 5','ps5 console','ps5 slim','dualsense','playstation vr','psvr2','psvr 2','console hardware','console specs','console sales','console price','playstation hardware','sony console','ps5 price','playstation price','ps5 stock','playstation stock','ps5 availability','ssd speed','ray tracing','teraflop','ps5 review','ps5 update','ps5 drm','playstation drm','ps5 offline','playstation 6','ps6','next gen playstation','next-gen console sony'];
+
+    const NETWORK_SIGNALS = ['playstation plus','ps plus','ps+ ','playstation network','psn outage','psn down','playstation now','ps now','playstation subscription','ps+ subscribers','playstation online','online service playstation','cloud gaming playstation','playstation streaming'];
+
+    const GAMES_SIGNALS = ['playstation exclusive','ps5 exclusive','sony exclusive','first-party game','first party game','playstation studios','sony santa monica','naughty dog','insomniac','guerrilla games','sucker punch','housemarque','bluepoint','media molecule','god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','ratchet and clank','sackboy','returnal',"demon's souls",'astro bot','helldivers','until dawn','concord','fairgame','marathon game','lego horizon','playstation game','sony game','ps5 game','ps4 game','game reveal','game trailer','game preview','game review','game launch playstation','release playstation','gameplay playstation','new playstation','playstation release','sony release','playstation title','sony title','playstation launch','ps5 new game','sony new game'];
+
+    const INDUSTRY_SIGNALS = ['xbox','game pass','microsoft gaming','activision','bethesda','nintendo switch','nintendo direct','switch 2','gaming market','video game industry','gaming revenue','games industry','steam deck','valve','epic games','epic store','take-two','rockstar','ea games','electronic arts','ubisoft','square enix','capcom','sega','bandai namco','konami','game developers conference','gdc','summer game fest','the game awards','gaming stocks','gaming acquisitions','publisher'];
 
     const assignCategory = article => {
         const t = `${article.title} ${article.description || ''}`.toLowerCase();
@@ -271,31 +296,37 @@
     };
 
     const SEARCH_QUERIES = [
-        { category: 'corporate', q: 'Sony Interactive Entertainment financial earnings quarterly' },
-        { category: 'corporate', q: 'Sony PlayStation acquisition lawsuit settlement fine' },
-        { category: 'corporate', q: 'Sony gaming layoff restructure impairment bungie' },
+        { category: 'corporate', q: 'Sony Interactive Entertainment financial earnings quarterly results' },
+        { category: 'corporate', q: 'Sony PlayStation acquisition lawsuit settlement fine antitrust' },
+        { category: 'corporate', q: 'Sony Bungie impairment charge write-down loss Marathon' },
+        { category: 'corporate', q: 'Sony PlayStation layoff restructure job cuts' },
+        { category: 'corporate', q: 'Sony gaming revenue profit fiscal year' },
         { category: 'hardware',  q: 'PlayStation 5 PS5 console hardware sales' },
-        { category: 'hardware',  q: 'PS5 Pro DualSense specs performance' },
-        { category: 'games',     q: 'PlayStation exclusive game release SIE' },
+        { category: 'hardware',  q: 'PS5 Pro DualSense specs performance price' },
+        { category: 'hardware',  q: 'PlayStation 6 PS6 next gen Sony console' },
+        { category: 'games',     q: 'PlayStation exclusive game release 2025' },
+        { category: 'games',     q: 'Sony PlayStation first party game studio announcement' },
         { category: 'games',     q: 'God of War Horizon Spider-Man PlayStation game' },
+        { category: 'games',     q: 'Naughty Dog Insomniac Guerrilla new game' },
         { category: 'network',   q: 'PlayStation Plus PS+ subscription tier Sony' },
         { category: 'network',   q: 'PlayStation Network PSN online service' },
+        { category: 'network',   q: 'PlayStation Plus subscribers growth monthly games' },
         { category: 'industry',  q: 'Xbox Game Pass Microsoft gaming news' },
-        { category: 'industry',  q: 'Nintendo Switch gaming industry news' },
-        { category: 'industry',  q: 'video game industry market trends publisher' }
+        { category: 'industry',  q: 'Nintendo Switch 2 gaming industry news' },
+        { category: 'industry',  q: 'video game industry market trends publisher 2025' }
     ];
 
     const BLOCKED_SOURCES   = ['alltoc','the sun','dailystar','dailymail','attack of the fanboy','wegotthiscovered','givemesport','sportskeeda','talkesport','clutchpoints','fansided','ninja journalism'];
     const PREFERRED_SOURCES = ['bbc','reuters','bloomberg','financial times','wall street journal','the verge','ign','gamesindustry','eurogamer','polygon','kotaku','wired','techcrunch','engadget','nytimes','guardian','wsj','forbes','gamespot','pcgamer','arstechnica','gamesradar','vgc','videogameschronicle','gamerant','dualshockers','gamingbolt','thegamer','screenrant'];
 
     const isReputableSource = a => { const s=(a.source?.name||'').toLowerCase(),u=(a.url||'').toLowerCase(); return !BLOCKED_SOURCES.some(b=>s.includes(b)||u.includes(b)); };
-    const sourceScore       = a => PREFERRED_SOURCES.some(p=>(a.source?.name||'').toLowerCase().includes(p)) ? 1 : 0;
+    const sourceScore = a => PREFERRED_SOURCES.some(p=>(a.source?.name||'').toLowerCase().includes(p)) ? 1 : 0;
 
     const SONY_TERMS = ['sony','playstation','ps5','ps4','psn','sie','ps plus','playstation plus','playstation studios','bungie','insomniac','naughty dog','santa monica','guerrilla','sucker punch','housemarque','bluepoint'];
     const isSonyRelevant = (a, cat) => { if (cat==='industry') return true; const t=`${a.title} ${a.description||''}`.toLowerCase(); return SONY_TERMS.some(x=>t.includes(x)); };
 
     const fingerprintTitle = t => { const stop=new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','its','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','into','over','under','then','when','where','how','all','both','each','more','most','other','some','such','no','not','only','same','so','than','too','very','just','also','what','know','says','said']); return new Set(t.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(' ').filter(w=>w.length>3&&!stop.has(w))); };
-    const extractAmounts   = t => (t.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi)||[]).map(n=>n.replace(/[mb]/i,'').toLowerCase());
+    const extractAmounts = t => (t.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi)||[]).map(n=>n.replace(/[mb]/i,'').toLowerCase());
     const extractTopicSigs = t => { const s=[],l=t.toLowerCase(); if(l.includes('price')&&(l.includes('drop')||l.includes('cut')||l.includes('reduc')||l.includes('lower')||l.includes('cheaper')))s.push('price_change'); const m=l.match(/(\d+)\s*(million|billion)\s*(units|consoles|sold|shipped)/); if(m)s.push('sales_'+m[1]+m[2]); return s; };
     const isSameStory = (a,b) => { const aA=extractAmounts(a),aB=extractAmounts(b); if(aA.length&&aB.length&&aA.some(x=>aB.includes(x)))return true; const sA=extractTopicSigs(a),sB=extractTopicSigs(b); if(sA.length&&sB.length&&sA.some(x=>sB.includes(x)))return true; const wA=fingerprintTitle(a),wB=fingerprintTitle(b); if(!wA.size||!wB.size)return false; return [...wA].filter(w=>wB.has(w)).length/Math.min(wA.size,wB.size)>=0.45; };
 
@@ -331,7 +362,7 @@
 
     let currentFilter='', allArticles={};
 
-    const setStatus = (text, type='ready') => { document.getElementById('status-text').textContent=text; document.getElementById('status-dot').className=`status-dot${type==='loading'?' loading':type==='error'?' error':''}`; };
+    const setStatus = (text,type='ready') => { document.getElementById('status-text').textContent=text; document.getElementById('status-dot').className=`status-dot${type==='loading'?' loading':type==='error'?' error':''}`; };
     const showError = msg => { const el=document.getElementById('error-banner'); el.textContent=msg; el.classList.toggle('visible',!!msg); };
     const formatDate = ds => { try { const d=new Date(ds),now=new Date(),m=Math.floor((now-d)/60000),h=Math.floor(m/60),day=Math.floor(h/24); if(m<1)return'just now'; if(m<60)return`${m}m ago`; if(h<24)return`${h}h ago`; if(day<7)return`${day}d ago`; return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){return'';} };
     const updateTimestamp = () => { document.getElementById('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); };
@@ -428,20 +459,10 @@
     window.addEventListener('DOMContentLoaded', () => {
         const btn=document.getElementById('refresh-btn');
         const tabs=document.getElementById('filter-tabs');
-
         if (!btn) { console.error('refresh-btn not found'); return; }
         if (!tabs) { console.error('filter-tabs not found'); return; }
-
-        btn.addEventListener('click', () => {
-            console.log('Refresh clicked');
-            refreshNews(true);
-        });
-
-        tabs.addEventListener('click', e => {
-            const tab=e.target.closest('.filter-tab');
-            if (tab) applyFilter(tab.dataset.filter);
-        });
-
+        btn.addEventListener('click', () => { console.log('Refresh clicked'); refreshNews(true); });
+        tabs.addEventListener('click', e => { const tab=e.target.closest('.filter-tab'); if (tab) applyFilter(tab.dataset.filter); });
         refreshNews(false);
     });
 
