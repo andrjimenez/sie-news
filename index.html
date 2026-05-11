@@ -85,11 +85,9 @@
         .article-title { display: block; font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.45; text-decoration: none; margin-bottom: 0.45rem; transition: color var(--transition); }
         .article-title:hover { color: var(--navy-light); }
         .article-excerpt { font-size: 0.82rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 0.65rem; }
-
         .insight-box { background: var(--accent); border-left: 3px solid var(--navy-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.5rem 0.75rem; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: flex-start; }
         .insight-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-mid); white-space: nowrap; padding-top: 0.1rem; flex-shrink: 0; }
         .insight-text { font-size: 0.82rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
-
         .article-link { font-family: var(--font-mono); font-size: 0.68rem; color: var(--navy-light); text-decoration: none; font-weight: 600; letter-spacing: 0.02em; transition: color var(--transition); }
         .article-link:hover { color: var(--navy); text-decoration: underline; }
 
@@ -158,10 +156,15 @@
 
 <script>
 const NEWS_API_KEY = '49f62eab61c1478086ac707012433080';
-const CACHE_KEY    = 'sie_v7_cache';
+const CACHE_KEY    = 'sie_v8_cache';
 const CACHE_TTL    = 30 * 60 * 1000;
 const MIN_SCORE    = 6;
-const PROXIES = ['https://api.allorigins.win/get?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest='];
+
+const PROXIES = [
+    'https://api.allorigins.win/get?url=',
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest='
+];
 
 const CATEGORIES = {
     hardware:  { label: 'Hardware',      desc: 'Console Hardware, Devices & Technology',   icon: '🎮' },
@@ -171,24 +174,43 @@ const CATEGORIES = {
     industry:  { label: 'Industry',      desc: 'Gaming Industry & Competitive Landscape',  icon: '🏭' }
 };
 
-const COMPETITOR_TERMS = ['xbox','microsoft gaming','game pass','activision','bethesda','nintendo','switch 2','nintendo direct','mario','zelda','steam deck','valve','epic games','epic store','take-two','rockstar','ea games','electronic arts','ubisoft','square enix','capcom','sega','bandai namco','konami','summer game fest','the game awards','gdc'];
+const COMPETITOR_TERMS = [
+    'xbox','microsoft gaming','game pass','activision','bethesda',
+    'nintendo','switch 2','nintendo direct','mario','zelda',
+    'steam deck','valve','epic games','epic store',
+    'take-two','rockstar','ea games','electronic arts','ubisoft',
+    'square enix','capcom','sega','bandai namco','konami',
+    'summer game fest','the game awards','gdc'
+];
 const hasCompetitor = text => COMPETITOR_TERMS.some(t => text.includes(t));
 
 const QUERIES = [
-    'Sony Interactive Entertainment',
-    'PlayStation Sony news',
-    'Sony PlayStation game',
-    'PlayStation Plus Sony',
-    'Sony gaming earnings',
-    'Sony Bungie impairment',
-    'PlayStation 6 PS6',
-    'Xbox gaming industry',
-    'Nintendo Switch gaming',
-    'Sony PlayStation lawsuit'
+    'Sony Interactive Entertainment news 2025',
+    'PlayStation 5 PS5 news hardware',
+    'Sony PlayStation exclusive game release',
+    'PlayStation Plus PS+ subscription Sony',
+    'Sony gaming earnings financial results quarterly',
+    'Sony Bungie Marathon impairment write-down',
+    'PlayStation 6 PS6 next gen Sony console',
+    'Sony PlayStation layoff restructure job cuts',
+    'PlayStation Network PSN online service',
+    'Sony PlayStation lawsuit settlement antitrust',
+    'Naughty Dog Insomniac Guerrilla Sony game announcement',
+    'God of War Horizon Spider-Man PlayStation new game',
+    'Sony gaming CEO executive leadership appointed',
+    'Xbox Game Pass Microsoft gaming industry news',
+    'Nintendo Switch 2 gaming market',
+    'video game industry market trends publisher 2025',
+    'PS5 Pro DualSense hardware specs sales',
+    'Sony acquisition partnership studio deal',
+    'Sony Bungie impairment loss Marathon game'
 ];
 
 const BLOCKED = ['alltoc','the sun','dailystar','dailymail','attack of the fanboy','wegotthiscovered','givemesport','sportskeeda','clutchpoints','ninja journalism'];
-const isReputable = a => { const s=(a.source?.name||'').toLowerCase(),u=(a.url||'').toLowerCase(); return !BLOCKED.some(b=>s.includes(b)||u.includes(b)); };
+const isReputable = a => {
+    const s=(a.source?.name||'').toLowerCase(), u=(a.url||'').toLowerCase();
+    return !BLOCKED.some(b => s.includes(b) || u.includes(b));
+};
 
 const fingerprint = t => {
     const stop = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','into','over','then','when','where','how','all','both','each','more','most','other','some','no','not','only','same','so','than','too','very','just','also','what','know','says','said']);
@@ -196,67 +218,109 @@ const fingerprint = t => {
 };
 const extractAmts = t => (t.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi)||[]).map(n=>n.replace(/[mb]/i,'').toLowerCase());
 const isSameStory = (a,b) => {
-    const amA=extractAmts(a),amB=extractAmts(b);
-    if(amA.length&&amB.length&&amA.some(x=>amB.includes(x)))return true;
-    const wA=fingerprint(a),wB=fingerprint(b);
-    if(!wA.size||!wB.size)return false;
-    return[...wA].filter(w=>wB.has(w)).length/Math.min(wA.size,wB.size)>=0.45;
+    const amA=extractAmts(a), amB=extractAmts(b);
+    if(amA.length&&amB.length&&amA.some(x=>amB.includes(x))) return true;
+    const wA=fingerprint(a), wB=fingerprint(b);
+    if(!wA.size||!wB.size) return false;
+    return [...wA].filter(w=>wB.has(w)).length / Math.min(wA.size,wB.size) >= 0.45;
 };
 
-const withTimeout = (url,opts={},ms=10000) => {
-    const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
-    return fetch(url,{...opts,signal:c.signal}).then(r=>{clearTimeout(t);return r;}).catch(e=>{clearTimeout(t);throw e;});
+const withTimeout = (url, opts={}, ms=12000) => {
+    const c=new AbortController(), t=setTimeout(()=>c.abort(), ms);
+    return fetch(url, {...opts, signal:c.signal})
+        .then(r => { clearTimeout(t); return r; })
+        .catch(e => { clearTimeout(t); throw e; });
 };
 
-const fetchProxy = async (url,idx=0) => {
-    if(idx>=PROXIES.length) throw new Error('All proxies failed');
+const fetchProxy = async (url, idx=0) => {
+    if(idx >= PROXIES.length) throw new Error('All proxies failed');
     try {
-        const proxyUrl = PROXIES[idx]+encodeURIComponent(url);
-        console.log(`Trying proxy ${idx}: ${PROXIES[idx].substring(0,30)}...`);
-        const res=await withTimeout(proxyUrl,{},12000);
+        const proxyUrl = PROXIES[idx] + encodeURIComponent(url);
+        console.log(`[Proxy ${idx}] Trying: ${PROXIES[idx].split('/')[2]}`);
+        const res = await withTimeout(proxyUrl, {}, 12000);
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const d=await res.json();
-        const parsed = d.contents ? JSON.parse(d.contents) : d;
-        if(!parsed || typeof parsed !== 'object') throw new Error('Invalid response');
-        return parsed;
-    } catch(e){
-        console.warn(`Proxy ${idx} failed:`,e.message);
-        return fetchProxy(url,idx+1);
+        const raw = await res.json();
+        const data = raw.contents ? JSON.parse(raw.contents) : raw;
+        return data;
+    } catch(e) {
+        console.warn(`[Proxy ${idx}] Failed: ${e.message}`);
+        return fetchProxy(url, idx+1);
     }
 };
 
 const fetchQuery = async q => {
-    const url=`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
     try {
-        const d=await fetchProxy(url);
-        if(d.status==='error'){ console.error(`NewsAPI error for "${q}":`, d.message); return []; }
-        console.log(`Query "${q}" → ${(d.articles||[]).length} articles`);
-        return d.articles||[];
-    } catch(e){ console.error(`fetchQuery failed for "${q}":`, e.message); return[]; }
+        const d = await fetchProxy(url);
+        if(d.status === 'error') {
+            console.error(`[NewsAPI] Error for "${q}": ${d.message}`);
+            return [];
+        }
+        console.log(`[Query] "${q}" → ${(d.articles||[]).length} articles`);
+        return d.articles || [];
+    } catch(e) {
+        console.error(`[Query] Failed "${q}": ${e.message}`);
+        return [];
+    }
 };
 
 const keywordScore = a => {
     const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
-    const s10 = ['impairment charge','write-down','writedown','write down','acquisition','acquires','acquired','merger','takeover','buyout','earnings','quarterly results','financial results','annual results','operating loss','net income','operating income','revenue miss','revenue beat','layoff','layoffs','job cuts','redundancies','restructuring','class action','antitrust','settlement','regulatory fine','lawsuit','ceo','chief executive','cfo','chief financial','appointed','steps down','resigns','ps5 price','playstation price','console price','price increase','price cut','ps6','playstation 6','next gen console','next-gen sony','studio closure','studio shut','game cancelled','game shutdown','bungie impairment','concord shutdown','marathon cancell','sony interactive entertainment','sie strategy','sony gaming strategy','investor','shareholder','stock','share price','fiscal year','fiscal quarter'];
+    const s10 = [
+        'impairment charge','write-down','writedown','write down',
+        'acquisition','acquires','acquired','merger','takeover','buyout',
+        'earnings','quarterly results','financial results','annual results','operating loss',
+        'net income','operating income','revenue miss','revenue beat',
+        'layoff','layoffs','job cuts','redundancies','restructuring',
+        'class action','antitrust','settlement','regulatory fine','lawsuit',
+        'ceo','chief executive','cfo','chief financial','appointed','steps down','resigns',
+        'ps5 price','playstation price','console price','price increase','price cut',
+        'ps6','playstation 6','next gen console','next-gen sony',
+        'studio closure','studio shut','game cancelled','game shutdown',
+        'bungie impairment','concord shutdown','marathon cancell',
+        'sony interactive entertainment','sie strategy','sony gaming strategy',
+        'investor','shareholder','stock','share price','fiscal year','fiscal quarter'
+    ];
     if(s10.some(k=>t.includes(k))) return 10;
-    const s8 = ['game pass price','game pass subscribers','xbox game pass','nintendo switch 2','switch 2 launch','switch 2 sales','ps plus subscribers','ps+ subscribers','playstation subscribers','psn outage','psn down','playstation network outage','ps5 sales','ps5 units','console sales','hardware sales','sony revenue','sony profit','sony fiscal','sony earnings','playstation market','gaming market share','microsoft gaming','activision deal','bethesda','exclusive deal','timed exclusive','third party exclusive','naughty dog','insomniac','guerrilla games','santa monica studio','housemarque','bluepoint','firesprite','bungie','sony acquisition','sony studio','sony partnership','playstation exclusive','ps5 exclusive','sony exclusive'];
+    const s8 = [
+        'game pass price','game pass subscribers','xbox game pass',
+        'nintendo switch 2','switch 2 launch','switch 2 sales',
+        'ps plus subscribers','ps+ subscribers','playstation subscribers',
+        'psn outage','psn down','playstation network outage',
+        'ps5 sales','ps5 units','console sales','hardware sales',
+        'sony revenue','sony profit','sony fiscal','sony earnings',
+        'playstation market','gaming market share','microsoft gaming',
+        'activision deal','bethesda','exclusive deal','timed exclusive',
+        'naughty dog','insomniac','guerrilla games','santa monica studio',
+        'housemarque','bluepoint','firesprite','bungie',
+        'sony acquisition','sony studio','sony partnership',
+        'playstation exclusive','ps5 exclusive','sony exclusive'
+    ];
     if(s8.some(k=>t.includes(k))) return 8;
-    const s6 = ['god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','astro bot','helldivers','ratchet','returnal','game launch','game release','game announcement','game reveal','ps plus games','playstation plus games','monthly games','dualsense','psvr','ps5 pro','ps5 slim','playstation store','psn store','gaming industry','video game industry','gaming market','nintendo','xbox','steam','epic games','take-two','ea games','ubisoft','game developer','game publisher','gaming revenue'];
+    const s6 = [
+        'god of war','spider-man','horizon','the last of us','ghost of tsushima',
+        'gran turismo','astro bot','helldivers','ratchet','returnal',
+        'game launch','game release','game announcement','game reveal',
+        'ps plus games','playstation plus games','monthly games',
+        'dualsense','psvr','ps5 pro','ps5 slim','playstation store',
+        'gaming industry','video game industry','gaming market',
+        'nintendo','xbox','steam','epic games','take-two','ubisoft',
+        'game developer','game publisher','gaming revenue'
+    ];
     if(s6.some(k=>t.includes(k))) return 6;
-    const s4 = ['sony','playstation','ps5','ps4','psn','ps plus'];
-    if(s4.some(k=>t.includes(k))) return 4;
+    if(['sony','playstation','ps5','ps4','psn','ps plus'].some(k=>t.includes(k))) return 4;
     return 2;
 };
 
 const fallbackCategory = a => {
     const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
     if(hasCompetitor(t)) return 'industry';
-    const corpTerms = ['earnings','revenue','profit','acquisition','acquires','acquired','merger','layoff','layoffs','job cuts','ceo','chief executive','cfo','lawsuit','settlement','impairment','write-down','restructuring','fiscal','shareholder','investor','bungie impairment','studio closure','studio shut','game cancelled','game shutdown'];
-    if(corpTerms.some(k=>t.includes(k))) return 'corporate';
+    const corp = ['earnings','revenue','profit','acquisition','acquires','acquired','merger','layoff','layoffs','job cuts','ceo','chief executive','cfo','lawsuit','settlement','impairment','write-down','restructuring','fiscal','shareholder','investor','bungie impairment','studio closure','studio shut','game cancelled','game shutdown'];
+    if(corp.some(k=>t.includes(k))) return 'corporate';
     if(['playstation plus','ps plus','psn outage','psn down','playstation network','playstation subscription','ps+ subscribers'].some(k=>t.includes(k))) return 'network';
-    const gameTerms = ['exclusive game','ps5 exclusive','playstation exclusive','sony exclusive','first-party','game launch','game release','game reveal','game announcement','game download','free game','ps store','playstation store game','god of war','spider-man','horizon','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet','returnal','naughty dog','insomniac','guerrilla','housemarque','bluepoint','saros','playstation studios'];
-    if(gameTerms.some(k=>t.includes(k))) return 'games';
-    if(['ps5 pro','ps5 slim','dualsense','psvr','playstation 5 console','ps6 specs','ps6 hardware','next gen console','console price','hardware sales','console sales'].some(k=>t.includes(k))) return 'hardware';
+    const game = ['exclusive game','ps5 exclusive','playstation exclusive','sony exclusive','first-party','game launch','game release','game reveal','game announcement','game download','free game','ps store','playstation store game','god of war','spider-man','horizon','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet','returnal','naughty dog','insomniac','guerrilla','housemarque','bluepoint','saros','playstation studios'];
+    if(game.some(k=>t.includes(k))) return 'games';
+    if(['ps5 pro','ps5 slim','dualsense','psvr','ps6 specs','ps6 hardware','next gen console','console price','hardware sales','console sales'].some(k=>t.includes(k))) return 'hardware';
     if(['ps6','playstation 6','ps5'].some(k=>t.includes(k))) return 'hardware';
     return 'games';
 };
@@ -266,29 +330,45 @@ const enrichBatch = async articles => {
     return articles.map(a => ({ ...a, score: keywordScore(a), category: fallbackCategory(a), insight: null }));
 };
 
-const saveCache = d => { try{ sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d})); }catch(e){} };
-const loadCache = () => { try{ const r=sessionStorage.getItem(CACHE_KEY); if(!r)return null; const{ts,data}=JSON.parse(r); return Date.now()-ts>CACHE_TTL?null:data; }catch(e){return null;} };
+const saveCache = d => { try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data:d})); } catch(e) {} };
+const loadCache = () => {
+    try {
+        const r = sessionStorage.getItem(CACHE_KEY);
+        if(!r) return null;
+        const {ts, data} = JSON.parse(r);
+        return Date.now() - ts > CACHE_TTL ? null : data;
+    } catch(e) { return null; }
+};
 
-let allArticles=[], currentFilter='';
+let allArticles = [], currentFilter = '';
 const el = id => document.getElementById(id);
-const setStatus = (txt,type='ready') => { el('status-text').textContent=txt; el('status-dot').className=`status-dot${type==='loading'?' loading':type==='error'?' error':''}`; };
-const showError = msg => { const e=el('error-banner'); e.textContent=msg; e.classList.toggle('visible',!!msg); };
+const setStatus = (txt, type='ready') => {
+    el('status-text').textContent = txt;
+    el('status-dot').className = `status-dot${type==='loading'?' loading':type==='error'?' error':''}`;
+};
+const showError = msg => { const e=el('error-banner'); e.textContent=msg; e.classList.toggle('visible', !!msg); };
 const formatDate = ds => {
-    try{ const d=new Date(ds),now=new Date(),m=Math.floor((now-d)/60000),h=Math.floor(m/60),day=Math.floor(h/24);
-    if(m<1)return'just now'; if(m<60)return`${m}m ago`; if(h<24)return`${h}h ago`;
-    if(day<7)return`${day}d ago`; return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }catch(e){return'';}
+    try {
+        const d=new Date(ds), now=new Date(), m=Math.floor((now-d)/60000), h=Math.floor(m/60), day=Math.floor(h/24);
+        if(m<1) return 'just now'; if(m<60) return `${m}m ago`;
+        if(h<24) return `${h}h ago`; if(day<7) return `${day}d ago`;
+        return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    } catch(e) { return ''; }
 };
 const scoreClass = s => s>=10?'s10':s>=9?'s9':s>=8?'s8':s>=7?'s7':s>=6?'s6':'slow';
 
 const updateStats = articles => {
-    const rel=articles.filter(a=>a.score>=MIN_SCORE), scores=rel.map(a=>a.score);
-    const avg=scores.length?(scores.reduce((s,x)=>s+x,0)/scores.length).toFixed(1):'—';
-    el('stat-total').textContent=articles.length; el('stat-relevant').textContent=rel.length;
-    el('stat-avg').textContent=avg; el('stats-bar').style.display='flex';
+    const rel = articles.filter(a=>a.score>=MIN_SCORE);
+    const scores = rel.map(a=>a.score);
+    const avg = scores.length ? (scores.reduce((s,x)=>s+x,0)/scores.length).toFixed(1) : '—';
+    el('stat-total').textContent = articles.length;
+    el('stat-relevant').textContent = rel.length;
+    el('stat-avg').textContent = avg;
+    el('stats-bar').style.display = 'flex';
 };
 
 const renderSkeletons = () => {
-    el('feed').innerHTML=[1,2,3,4,5].map(()=>`
+    el('feed').innerHTML = [1,2,3,4,5].map(() => `
         <div class="skeleton-card">
             <div class="skel skel-xs"></div><div class="skel skel-sm"></div>
             <div class="skel skel-sm2"></div><div class="skel skel-md"></div>
@@ -297,18 +377,22 @@ const renderSkeletons = () => {
 };
 
 const renderFeed = () => {
-    const feed=el('feed');
-    const relevant=allArticles.filter(a=>a.score>=MIN_SCORE);
-    if(!relevant.length){ feed.innerHTML='<div class="empty-state">No relevant articles found. Try refreshing.</div>'; return; }
-    const grouped={};
-    Object.keys(CATEGORIES).forEach(k=>grouped[k]=[]);
-    relevant.forEach(a=>{ if(grouped[a.category]) grouped[a.category].push(a); });
-    feed.innerHTML=Object.entries(CATEGORIES).map(([key,cat])=>{
-        const articles=grouped[key]||[];
-        const hidden=currentFilter&&currentFilter!==key?' hidden':'';
-        const body=articles.length===0
-            ?'<div class="empty-state">No articles in this category</div>'
-            :articles.map(a=>`
+    const feed = el('feed');
+    const relevant = allArticles.filter(a => a.score >= MIN_SCORE);
+    if(!relevant.length) {
+        feed.innerHTML = '<div class="empty-state">No relevant articles found. Try refreshing.</div>';
+        return;
+    }
+    const grouped = {};
+    Object.keys(CATEGORIES).forEach(k => grouped[k] = []);
+    relevant.forEach(a => { if(grouped[a.category]) grouped[a.category].push(a); });
+
+    feed.innerHTML = Object.entries(CATEGORIES).map(([key, cat]) => {
+        const articles = grouped[key] || [];
+        const hidden = currentFilter && currentFilter !== key ? ' hidden' : '';
+        const body = articles.length === 0
+            ? '<div class="empty-state">No articles in this category</div>'
+            : articles.map(a => `
                 <div class="article-card">
                     <div class="article-main">
                         <div class="article-meta">
@@ -318,7 +402,7 @@ const renderFeed = () => {
                         </div>
                         <a class="article-title" href="${a.url}" target="_blank" rel="noopener noreferrer">${a.title}</a>
                         <p class="article-excerpt">${(a.excerpt||'').substring(0,200)}${(a.excerpt||'').length>200?'…':''}</p>
-                        ${a.insight?`<div class="insight-box"><span class="insight-label">Why it Matters</span><span class="insight-text">${a.insight}</span></div>`:''}
+                        ${a.insight ? `<div class="insight-box"><span class="insight-label">Why it Matters</span><span class="insight-text">${a.insight}</span></div>` : ''}
                         <a class="article-link" href="${a.url}" target="_blank" rel="noopener noreferrer">Read full article →</a>
                     </div>
                     <div class="score-badge ${scoreClass(a.score)}">${a.score}</div>
@@ -339,51 +423,86 @@ const renderFeed = () => {
 };
 
 const applyFilter = f => {
-    currentFilter=f;
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
-    document.querySelectorAll('.category-group').forEach(g=>g.classList.toggle('hidden',f!==''&&g.dataset.category!==f));
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter===f));
+    document.querySelectorAll('.category-group').forEach(g => g.classList.toggle('hidden', f!==''&&g.dataset.category!==f));
 };
 
 const refresh = async (force=false) => {
-    const btn=el('refresh-btn');
-    btn.disabled=true; btn.classList.add('spinning');
-    setStatus('Fetching…','loading'); showError('');
-    if(!force){ const cached=loadCache(); if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter); el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; } }
+    const btn = el('refresh-btn');
+    btn.disabled = true; btn.classList.add('spinning');
+    setStatus('Fetching…', 'loading'); showError('');
+
+    if(!force) {
+        const cached = loadCache();
+        if(cached) {
+            allArticles = cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter);
+            el('timestamp').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+            setStatus('Ready', 'ready'); btn.disabled=false; btn.classList.remove('spinning');
+            return;
+        }
+    }
+
     try {
         renderSkeletons();
-        const raw=await Promise.allSettled(QUERIES.map(q=>fetchQuery(q)));
-        const seenUrls=new Set(), seenTitles=[], pool=[];
-        raw.forEach(r=>{
-            if(r.status!=='fulfilled') return;
-            for(const a of r.value){
-                if(!a.url||seenUrls.has(a.url)) continue;
+        console.log(`[Dashboard] Fetching ${QUERIES.length} queries in parallel...`);
+        const raw = await Promise.allSettled(QUERIES.map(q => fetchQuery(q)));
+
+        const seenUrls = new Set(), seenTitles = [], pool = [];
+        raw.forEach(r => {
+            if(r.status !== 'fulfilled') return;
+            for(const a of r.value) {
+                if(!a.url || seenUrls.has(a.url)) continue;
                 if(!isReputable(a)) continue;
-                if(seenTitles.some(t=>isSameStory(t,a.title))) continue;
+                if(seenTitles.some(t => isSameStory(t, a.title))) continue;
                 seenUrls.add(a.url); seenTitles.push(a.title);
-                pool.push({title:a.title,source:a.source.name,date:formatDate(a.publishedAt),excerpt:a.description||'',url:a.url,score:0,category:'industry',insight:null});
+                pool.push({
+                    title: a.title, source: a.source.name,
+                    date: formatDate(a.publishedAt), excerpt: a.description||'',
+                    url: a.url, score: 0, category: 'industry', insight: null
+                });
             }
         });
-        console.log(`Pool after dedup: ${pool.length}`);
-        if(!pool.length){ showError('No articles found. Open F12 → Console for details.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
 
-        setStatus('Categorising…','loading');
-        const enriched=[], BATCH=15;
-        for(let i=0;i<pool.length;i+=BATCH){ enriched.push(...await enrichBatch(pool.slice(i,i+BATCH))); }
-        enriched.sort((a,b)=>b.score-a.score);
-        allArticles=enriched;
+        console.log(`[Dashboard] Pool after dedup: ${pool.length} articles`);
+
+        if(!pool.length) {
+            showError('No articles found. Open F12 → Console to see which proxy is failing.');
+            setStatus('Error', 'error'); btn.disabled=false; btn.classList.remove('spinning');
+            return;
+        }
+
+        setStatus('Categorising…', 'loading');
+        const enriched = [], BATCH = 15;
+        for(let i=0; i<pool.length; i+=BATCH) {
+            enriched.push(...await enrichBatch(pool.slice(i, i+BATCH)));
+        }
+        enriched.sort((a,b) => b.score - a.score);
+        allArticles = enriched;
+
         updateStats(allArticles); renderFeed(); applyFilter(currentFilter); saveCache(allArticles);
-        el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-        setStatus('Ready','ready');
-    } catch(err){ console.error(err); showError(`Error: ${err.message}`); setStatus('Error','error');
-    } finally { btn.disabled=false; btn.classList.remove('spinning'); }
+        el('timestamp').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+        setStatus('Ready', 'ready');
+
+    } catch(err) {
+        console.error('[Dashboard] Unexpected error:', err);
+        showError(`Error: ${err.message}`);
+        setStatus('Error', 'error');
+    } finally {
+        btn.disabled = false; btn.classList.remove('spinning');
+    }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-    el('refresh-btn').addEventListener('click', ()=>refresh(true));
-    document.querySelector('.toolbar').addEventListener('click', e=>{ const btn=e.target.closest('.filter-btn'); if(btn) applyFilter(btn.dataset.filter); });
+    el('refresh-btn').addEventListener('click', () => refresh(true));
+    document.querySelector('.toolbar').addEventListener('click', e => {
+        const btn = e.target.closest('.filter-btn');
+        if(btn) applyFilter(btn.dataset.filter);
+    });
     refresh(false);
 });
-setInterval(()=>refresh(true), 30*60*1000);
+
+setInterval(() => refresh(true), 30 * 60 * 1000);
 </script>
 </body>
 </html>
