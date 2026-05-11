@@ -3,399 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sony Interactive Entertainment - News Dashboard</title>
+    <title>SIE News Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ─── DESIGN TOKENS ─────────────────────────────────────── */
+        :root {
+            --navy:        #00155a;
+            --navy-mid:    #002080;
+            --navy-light:  #0a2db3;
+            --accent:      #e8f0fe;
+            --accent-bright: #4f7cff;
+            --white:       #ffffff;
+            --off-white:   #f7f8fc;
+            --gray-100:    #f0f2f8;
+            --gray-200:    #e2e6f0;
+            --gray-400:    #8892b0;
+            --gray-600:    #4a5580;
+            --gray-800:    #1e2340;
+            --text:        #0d1126;
+            --red:         #e53935;
+            --orange:      #f57c00;
+            --green:       #2e7d32;
+
+            --font-sans:   'IBM Plex Sans', sans-serif;
+            --font-mono:   'IBM Plex Mono', monospace;
+
+            --radius-sm:   4px;
+            --radius-md:   8px;
+            --radius-lg:   12px;
+            --shadow-sm:   0 1px 3px rgba(0,21,90,0.08), 0 1px 2px rgba(0,21,90,0.06);
+            --shadow-md:   0 4px 12px rgba(0,21,90,0.10), 0 2px 4px rgba(0,21,90,0.06);
+            --shadow-lg:   0 8px 24px rgba(0,21,90,0.12), 0 4px 8px rgba(0,21,90,0.08);
+            --transition:  150ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: #ffffff;
-            color: #1a1a1a;
+            font-family: var(--font-sans);
+            background: var(--off-white);
+            color: var(--text);
             min-height: 100vh;
-            padding: 2rem;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header {
+
+        .page-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .site-header {
+            background: var(--navy);
+            margin: 0 -2rem;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .header-inner {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 2rem;
+        }
+
+        .brand { display: flex; flex-direction: column; gap: 1px; }
+
+        .brand-name {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--white);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-sub {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.04em;
+            font-family: var(--font-mono);
+        }
+
+        .header-controls { display: flex; align-items: center; gap: 1rem; }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 999px;
+            padding: 0.3rem 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4caf50;
+            flex-shrink: 0;
+        }
+        .status-dot.loading { background: var(--orange); animation: blink 1s ease infinite; }
+        .status-dot.error   { background: var(--red); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .timestamp {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.35);
+            white-space: nowrap;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem 0 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            white-space: nowrap;
+        }
+
+        .filter-tabs { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+
+        .filter-tab {
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1.5px solid var(--gray-200);
+            background: var(--white);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-tab:hover { border-color: var(--navy-light); color: var(--navy-mid); }
+        .filter-tab.active { background: var(--navy-mid); border-color: var(--navy-mid); color: var(--white); }
+
+        .filter-tab .tab-count {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 999px;
+            padding: 0 0.35rem;
+            line-height: 1.6;
+            min-width: 18px;
             text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 3px solid #000080;
+            display: none;
         }
-        .header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; color: #000080; letter-spacing: -0.5px; }
-        .header p { color: #666666; font-size: 1rem; margin-bottom: 0.5rem; }
-        .header .subtitle { color: #999999; font-size: 0.9rem; font-style: italic; }
-        .last-updated { font-size: 0.85rem; color: #999999; margin-top: 0.5rem; }
-        .controls { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; justify-content: center; }
-        .control-group { display: flex; gap: 0.75rem; align-items: center; }
-        .control-group label { font-size: 0.95rem; color: #333333; font-weight: 500; }
-        select, button {
-            padding: 0.6rem 1rem; font-size: 0.9rem; border: 1.5px solid #000080;
-            border-radius: 4px; background: #ffffff; color: #000080; cursor: pointer;
-            font-weight: 500; transition: all 0.2s ease;
+
+        .filter-tab.active .tab-count,
+        .filter-tab .tab-count.has-count { display: inline; }
+
+        .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+
+        .btn-refresh {
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.45rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--navy-mid);
+            background: var(--navy-mid);
+            color: var(--white);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            letter-spacing: 0.02em;
         }
-        select:hover, button:hover { background: #000080; color: #ffffff; }
-        select:focus, button:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,0,128,0.1); }
-        button:active { transform: scale(0.98); }
-        .status { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #666666; margin-left: auto; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4CAF50; }
-        .status-dot.loading { background: #FF9800; animation: pulse 1s infinite; }
-        .status-dot.error { background: #F44336; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
-        .category-card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; transition: all 0.3s ease; }
-        .category-card:hover { border-color: #000080; box-shadow: 0 4px 12px rgba(0,0,128,0.1); transform: translateY(-2px); }
-        .category-header { background: #000080; color: #ffffff; padding: 1.2rem; }
-        .category-header h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 0.4rem; letter-spacing: -0.3px; }
-        .category-header .unit-description { font-size: 0.8rem; opacity: 0.9; margin: 0; }
-        .category-header .strategic-focus { font-size: 0.75rem; opacity: 0.8; margin-top: 0.4rem; font-style: italic; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 0.4rem; }
-        .article-list { padding: 1.2rem; max-height: 700px; overflow-y: auto; }
-        .article { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; transition: all 0.2s ease; }
-        .article:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .article:hover { padding-left: 0.5rem; border-left: 3px solid #000080; }
-        .article-title { font-size: 0.95rem; font-weight: 600; color: #000080; margin-bottom: 0.5rem; line-height: 1.4; text-decoration: none; display: block; }
-        .article-title:hover { color: #0000b3; text-decoration: underline; }
-        .article-meta { font-size: 0.75rem; color: #666666; margin-bottom: 0.6rem; }
-        .article-source { color: #000080; font-weight: 600; }
-        .article-excerpt { font-size: 0.85rem; color: #444444; line-height: 1.5; margin-bottom: 0.75rem; }
-        .business-impact { background: #f0f4ff; border-left: 3px solid #000080; padding: 0.75rem; border-radius: 2px; margin-bottom: 0.75rem; font-size: 0.8rem; line-height: 1.6; }
-        .business-impact strong { color: #000080; display: block; margin-bottom: 0.3rem; }
-        .business-impact .impact-text { color: #333333; font-style: italic; }
-        .impact-loading { color: #aaaaaa; font-style: italic; animation: pulse 1.5s infinite; }
-        .article-link { font-size: 0.8rem; color: #000080; text-decoration: none; font-weight: 600; }
-        .article-link:hover { color: #0000b3; text-decoration: underline; }
-        .empty { padding: 2rem; text-align: center; color: #999999; font-size: 0.9rem; }
-        .error-message { background: #FFF3CD; border: 1px solid #FFE082; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.6; }
+
+        .btn-refresh:hover:not(:disabled) { background: var(--navy); border-color: var(--navy); }
+        .btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-refresh .icon { display: inline-block; font-size: 1rem; line-height: 1; }
+        .btn-refresh.spinning .icon { animation: spin 1s linear infinite; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-banner {
+            background: #fff3cd;
+            border: 1px solid #f0c040;
+            color: #7a5000;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            display: none;
+        }
+        .error-banner.visible { display: block; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .category-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition), transform var(--transition);
+        }
+
+        .category-card:hover { box-shadow: var(--shadow-md); }
+        .category-card.hidden { display: none; }
+
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .card-header-left { flex: 1; min-width: 0; }
+
+        .card-category-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--navy-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title { font-size: 0.95rem; font-weight: 600; color: var(--gray-800); line-height: 1.3; }
+        .card-focus { font-size: 0.72rem; color: var(--gray-400); margin-top: 0.2rem; font-style: italic; }
+
+        .card-badge {
+            flex-shrink: 0;
+            background: var(--navy);
+            color: var(--white);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            min-width: 28px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        .card-badge.loading-badge {
+            background: var(--gray-200);
+            color: var(--gray-400);
+            animation: blink 1.2s ease infinite;
+        }
+
+        .article-list {
+            max-height: 680px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-200) transparent;
+        }
+
+        .article-list::-webkit-scrollbar { width: 4px; }
+        .article-list::-webkit-scrollbar-track { background: transparent; }
+        .article-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 999px; }
+
+        .article-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            transition: background var(--transition);
+        }
+
+        .article-item:last-child { border-bottom: none; }
+        .article-item:hover { background: var(--gray-100); }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .article-source {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--navy-light);
+            letter-spacing: 0.03em;
+        }
+
+        .meta-sep { color: var(--gray-200); font-size: 0.65rem; }
+
+        .article-date {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--gray-400);
+        }
+
+        .article-title {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.45;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: color var(--transition);
+        }
+
+        .article-title:hover { color: var(--navy-light); }
+
+        .article-excerpt {
+            font-size: 0.78rem;
+            color: var(--gray-600);
+            line-height: 1.55;
+            margin-bottom: 0.6rem;
+        }
+
+        .insight-box {
+            background: var(--accent);
+            border-left: 3px solid var(--navy-light);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.55rem 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .insight-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--navy-mid);
+            margin-bottom: 0.2rem;
+        }
+
+        .insight-text { font-size: 0.775rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
+        .insight-loading { font-size: 0.75rem; color: var(--gray-400); font-style: italic; animation: blink 1.5s ease infinite; }
+
+        .article-link {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--navy-light);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: color var(--transition);
+        }
+
+        .article-link:hover { color: var(--navy); text-decoration: underline; }
+
+        .skeleton-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .skeleton-item:last-child { border-bottom: none; }
+
+        .skeleton-line {
+            background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+            background-size: 200% 100%;
+            border-radius: var(--radius-sm);
+            animation: shimmer 1.4s ease infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-line.s-short  { height: 10px; width: 35%; }
+        .skeleton-line.s-title  { height: 14px; width: 90%; margin-bottom: 0.35rem; }
+        .skeleton-line.s-title2 { height: 14px; width: 70%; margin-bottom: 0.6rem; }
+        .skeleton-line.s-body   { height: 10px; width: 100%; }
+        .skeleton-line.s-body2  { height: 10px; width: 85%; }
+        .skeleton-line.s-body3  { height: 10px; width: 60%; margin-bottom: 0; }
+
+        .empty-state {
+            padding: 2.5rem 1.25rem;
+            text-align: center;
+            color: var(--gray-400);
+            font-size: 0.82rem;
+        }
+
+        .empty-state svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--gray-200);
+            margin-bottom: 0.75rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         @media (max-width: 768px) {
-            body { padding: 1rem; }
-            .header h1 { font-size: 1.5rem; }
-            .category-grid { grid-template-columns: 1fr; gap: 1rem; }
-            .status { margin-left: 0; margin-top: 0.5rem; width: 100%; }
+            .page-wrapper { padding: 0 1rem 3rem; }
+            .site-header  { margin: 0 -1rem; padding: 0 1rem; }
+            .timestamp    { display: none; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .toolbar { gap: 0.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Sony Interactive Entertainment</h1>
-            <p>News Dashboard</p>
-            <div class="subtitle">Latest news by category</div>
-            <div class="last-updated">Last updated: <span id="timestamp">Never</span></div>
-        </div>
-        <div class="controls">
-            <div class="control-group">
-                <label for="filter">Filter by Category:</label>
-                <select id="filter">
-                    <option value="">All categories</option>
-                    <option value="hardware">Hardware</option>
-                    <option value="games">Games</option>
-                    <option value="network">Network & PS+</option>
-                    <option value="corporate">Corporate</option>
-                </select>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-name">SIE · News Dashboard</span>
+                <span class="brand-sub">Sony Interactive Entertainment</span>
             </div>
-            <button id="refresh-btn">⟳ Refresh</button>
-            <div class="status">
-                <div class="status-dot" id="status-dot"></div>
-                <span id="status-text">Ready</span>
+            <div class="header-controls">
+                <span class="timestamp" id="timestamp"></span>
+                <div class="status-pill">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Ready</span>
+                </div>
             </div>
         </div>
-        <div id="error-container"></div>
-        <div class="category-grid" id="articles"></div>
+    </header>
+
+    <div class="page-wrapper">
+
+        <div class="toolbar">
+            <span class="toolbar-label">Filter</span>
+            <div class="filter-tabs" id="filter-tabs">
+                <button class="filter-tab active" data-filter="">
+                    All
+                    <span class="tab-count" id="count-all"></span>
+                </button>
+                <button class="filter-tab" data-filter="hardware">
+                    Hardware
+                    <span class="tab-count" id="count-hardware"></span>
+                </button>
+                <button class="filter-tab" data-filter="games">
+                    Games
+                    <span class="tab-count" id="count-games"></span>
+                </button>
+                <button class="filter-tab" data-filter="network">
+                    Network &amp; PS+
+                    <span class="tab-count" id="count-network"></span>
+                </button>
+                <button class="filter-tab" data-filter="corporate">
+                    Corporate
+                    <span class="tab-count" id="count-corporate"></span>
+                </button>
+                <button class="filter-tab" data-filter="industry">
+                    Industry
+                    <span class="tab-count" id="count-industry"></span>
+                </button>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn-refresh" id="refresh-btn">
+                    <span class="icon">⟳</span>
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="error-banner" id="error-banner"></div>
+        <div class="dashboard-grid" id="dashboard-grid"></div>
+
     </div>
 
     <script>
-        const NEWS_API_KEY = '49f62eab61c1478086ac707012433080';
-        const PROXIES = [
-            'https://api.allorigins.win/get?url=',
-            'https://corsproxy.io/?'
-        ];
-        let allArticles = {};
+    const NEWS_API_KEY = '49f62eab61c1478086ac707012433080';
+    const CACHE_KEY    = 'sie_dashboard_cache';
+    const CACHE_TTL_MS = 30 * 60 * 1000;
 
-        const businessUnits = {
-            hardware: {
-                label: 'Hardware',
-                description: 'Console Hardware, Devices & Technology',
-                strategicFocus: 'PS5, PS5 Pro, DualSense, console specs, hardware sales'
-            },
-            games: {
-                label: 'Games',
-                description: 'SIE Exclusive Titles, Studios & Game Launches',
-                strategicFocus: 'SIE exclusives, first-party studios, game launches, gameplay'
-            },
-            network: {
-                label: 'Network & PS+',
-                description: 'PlayStation Plus & Online Services',
-                strategicFocus: 'PS+ tiers, subscribers, PSN, online infrastructure'
-            },
-            corporate: {
-                label: 'Corporate',
-                description: 'Earnings, M&A, Legal & Leadership',
-                strategicFocus: 'Financial results, acquisitions, legal, partnerships, executive news'
-            }
-        };
+    const PROXIES = [
+        'https://api.allorigins.win/get?url=',
+        'https://corsproxy.io/?'
+    ];
 
-        const CORPORATE_SIGNALS = [
-            'earnings', 'quarterly results', 'financial results', 'annual report',
-            'revenue', 'profit', 'operating loss', 'net income', 'operating income',
-            'fiscal year', 'fiscal quarter', 'guidance', 'forecast', 'valuation',
-            'stock price', 'share price', 'investor', 'shareholder', 'ipo', 'buyout',
-            'acquisition', 'acquires', 'acquired', 'merger', 'takeover',
-            'layoff', 'layoffs', 'job cuts', 'redundancies', 'restructuring', 'reorg',
-            'class action', 'antitrust', 'litigation', 'settlement agreement',
-            'regulatory fine', 'pay $', 'pay million', 'pay billion',
-            'playstation store fine', 'playstation store settlement',
-            'impairment charge', 'write-down', 'writedown',
-            'ceo', 'chief executive', 'chief financial officer', 'cfo',
-            'chairman', 'appointed as', 'steps down', 'resigns as', 'named president',
-            'strategic partnership', 'strategic alliance', 'licensing agreement',
-            'joint venture', 'multi-year deal', 'content deal',
-            'bungie', 'haven studios', 'insomniac games', 'naughty dog',
-            'santa monica studio', 'guerrilla games', 'sucker punch', 'media molecule',
-            'firesprite', 'bluepoint', 'housemarque', 'nixxes'
-        ];
-
-        const HARDWARE_SIGNALS = [
-            'ps5 pro', 'playstation 5', 'ps5 console', 'ps5 slim', 'dualsense',
-            'playstation vr', 'psvr2', 'psvr 2',
-            'console hardware', 'console specs', 'console sales', 'console price',
-            'playstation hardware', 'sony console', 'ps5 price', 'playstation price',
-            'ps5 stock', 'playstation stock', 'ps5 availability',
-            'ssd speed', 'ray tracing', 'teraflop', 'ps5 review', 'ps5 update'
-        ];
-
-        const NETWORK_SIGNALS = [
-            'playstation plus', 'ps plus', 'ps+ ',
-            'playstation network', 'psn outage', 'psn down',
-            'playstation now', 'ps now',
-            'playstation subscription', 'ps+ subscribers',
-            'playstation online', 'online service playstation',
-            'cloud gaming playstation', 'playstation streaming'
-        ];
-
-        const GAMES_SIGNALS = [
-            'playstation exclusive', 'ps5 exclusive', 'sony exclusive',
-            'first-party game', 'first party game',
-            'playstation studios', 'sony santa monica', 'naughty dog',
-            'insomniac', 'guerrilla games', 'sucker punch',
-            'housemarque', 'bluepoint', 'media molecule',
-            'god of war', 'spider-man', 'horizon', 'the last of us', 'ghost of tsushima',
-            'gran turismo', 'ratchet and clank', 'sackboy', 'returnal', 'demon\'s souls',
-            'astro bot', 'helldivers', 'until dawn', 'concord', 'fairgame',
-            'playstation game', 'sony game', 'ps5 game', 'ps4 game',
-            'game reveal', 'game trailer', 'game preview', 'game review',
-            'game launch playstation', 'release playstation', 'gameplay playstation',
-            'new playstation', 'playstation release', 'sony release',
-            'playstation title', 'sony title', 'playstation launch'
-        ];
-
-        function assignCategory(article) {
-            const text = `${article.title} ${article.description || ''}`.toLowerCase();
-            if (CORPORATE_SIGNALS.some(kw => text.includes(kw))) return 'corporate';
-            if (HARDWARE_SIGNALS.some(kw => text.includes(kw))) return 'hardware';
-            if (NETWORK_SIGNALS.some(kw => text.includes(kw))) return 'network';
-            if (GAMES_SIGNALS.some(kw => text.includes(kw))) return 'games';
-            return null;
+    const CATEGORIES = {
+        hardware: {
+            label:       'Hardware',
+            description: 'Console Hardware, Devices & Technology',
+            focus:       'PS5, PS5 Pro, DualSense, console specs, hardware sales'
+        },
+        games: {
+            label:       'Games',
+            description: 'SIE Exclusive Titles, Studios & Launches',
+            focus:       'SIE exclusives, first-party studios, game launches, gameplay'
+        },
+        network: {
+            label:       'Network & PS+',
+            description: 'PlayStation Plus & Online Services',
+            focus:       'PS+ tiers, subscribers, PSN, online infrastructure'
+        },
+        corporate: {
+            label:       'Corporate',
+            description: 'Earnings, M&A, Legal & Leadership',
+            focus:       'Financial results, acquisitions, legal, partnerships, executive news'
+        },
+        industry: {
+            label:       'Industry',
+            description: 'Gaming Industry & Competitive Landscape',
+            focus:       'Xbox, Nintendo, market trends, publisher moves, gaming industry news'
         }
+    };
 
-        const searchQueries = [
-            { category: 'corporate', queries: [
-                'Sony Interactive Entertainment financial earnings quarterly',
-                'Sony PlayStation acquisition lawsuit settlement fine',
-                'Sony gaming layoff restructure impairment bungie',
-                'Sony PlayStation class action antitrust settlement'
-            ]},
-            { category: 'hardware', queries: [
-                'PlayStation 5 PS5 console hardware sales',
-                'PS5 Pro DualSense specs performance',
-                'Sony PlayStation console hardware announcement'
-            ]},
-            { category: 'games', queries: [
-                'PlayStation exclusive game release SIE',
-                'Sony first party game studio announcement',
-                'God of War Horizon Spider-Man PlayStation game'
-            ]},
-            { category: 'network', queries: [
-                'PlayStation Plus PS+ subscription tier Sony',
-                'PlayStation Network PSN online service',
-                'PS Plus subscribers growth Sony'
-            ]}
-        ];
+    const CORPORATE_SIGNALS = [
+        'earnings','quarterly results','financial results','annual report',
+        'revenue','profit','operating loss','net income','operating income',
+        'fiscal year','fiscal quarter','guidance','forecast','valuation',
+        'stock price','share price','investor','shareholder','ipo','buyout',
+        'acquisition','acquires','acquired','merger','takeover',
+        'layoff','layoffs','job cuts','redundancies','restructuring','reorg',
+        'class action','antitrust','litigation','settlement agreement',
+        'regulatory fine','pay $','pay million','pay billion',
+        'playstation store fine','playstation store settlement',
+        'impairment charge','write-down','writedown',
+        'ceo','chief executive','chief financial officer','cfo',
+        'chairman','appointed as','steps down','resigns as','named president',
+        'strategic partnership','strategic alliance','licensing agreement',
+        'joint venture','multi-year deal','content deal',
+        'bungie','haven studios','insomniac games','naughty dog',
+        'santa monica studio','guerrilla games','sucker punch','media molecule',
+        'firesprite','bluepoint','housemarque','nixxes'
+    ];
 
-        const SONY_TERMS = [
-            'sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie',
-            'ps plus', 'playstation plus', 'playstation studios',
-            'bungie', 'insomniac', 'naughty dog', 'santa monica',
-            'guerrilla', 'sucker punch', 'housemarque', 'bluepoint'
-        ];
+    const HARDWARE_SIGNALS = [
+        'ps5 pro','playstation 5','ps5 console','ps5 slim','dualsense',
+        'playstation vr','psvr2','psvr 2',
+        'console hardware','console specs','console sales','console price',
+        'playstation hardware','sony console','ps5 price','playstation price',
+        'ps5 stock','playstation stock','ps5 availability',
+        'ssd speed','ray tracing','teraflop','ps5 review','ps5 update'
+    ];
 
-        const BLOCKED_SOURCES = [
-            'alltoc', 'the sun', 'dailystar', 'dailymail',
-            'attack of the fanboy', 'wegotthiscovered',
-            'givemesport', 'sportskeeda', 'talkesport',
-            'clutchpoints', 'fansided', 'ninja journalism'
-        ];
+    const NETWORK_SIGNALS = [
+        'playstation plus','ps plus','ps+ ',
+        'playstation network','psn outage','psn down',
+        'playstation now','ps now',
+        'playstation subscription','ps+ subscribers',
+        'playstation online','online service playstation',
+        'cloud gaming playstation','playstation streaming'
+    ];
 
-        const PREFERRED_SOURCES = [
-            'bbc', 'reuters', 'bloomberg', 'financial times', 'wall street journal',
-            'the verge', 'ign', 'gamesindustry', 'eurogamer', 'polygon',
-            'kotaku', 'wired', 'techcrunch', 'engadget', 'nytimes',
-            'guardian', 'wsj', 'forbes', 'gamespot', 'pcgamer',
-            'arstechnica', 'gamesradar', 'vgc', 'videogameschronicle',
-            'gamerant', 'dualshockers', 'gamingbolt', 'thegamer', 'screenrant'
-        ];
-
-        function isReputableSource(article) {
-            const source = (article.source?.name || '').toLowerCase();
-            const url = (article.url || '').toLowerCase();
-            if (BLOCKED_SOURCES.some(s => source.includes(s) || url.includes(s))) return false;
-            return true;
-        }
-
-        function sourceScore(article) {
-            const source = (article.source?.name || '').toLowerCase();
-            return PREFERRED_SOURCES.some(s => source.includes(s)) ? 1 : 0;
-        }
-
-        function isSonyRelevant(article) {
-            const text = `${article.title} ${article.description || ''}`.toLowerCase();
-            return SONY_TERMS.some(term => text.includes(term));
-        }
-
-        function fingerprintTitle(title) {
-            const stopWords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','its','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','into','over','under','then','when','where','how','all','both','each','more','most','other','some','such','no','not','only','same','so','than','too','very','just','also','what','know','says','said']);
-            return new Set(
-                title.toLowerCase()
-                    .replace(/[^a-z0-9 ]/g, '')
-                    .split(' ')
-                    .filter(w => w.length > 3 && !stopWords.has(w))
-            );
-        }
-
-        function extractAmounts(title) {
-            return (title.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi) || [])
-                .map(n => n.replace(/[mb]/i, '').toLowerCase());
-        }
-
-        function extractTopicSignals(title) {
-            const t = title.toLowerCase();
-            const signals = [];
-            if (t.includes('price') && (t.includes('drop') || t.includes('cut') || t.includes('reduc') || t.includes('lower') || t.includes('cheaper'))) {
-                signals.push('price_change');
-            }
-            const salesMatch = t.match(/(\d+)\s*(million|billion)\s*(units|consoles|sold|shipped)/);
-            if (salesMatch) signals.push('sales_' + salesMatch[1] + salesMatch[2]);
-            return signals;
-        }
-
-        function isSameStory(titleA, titleB) {
-            const amtsA = extractAmounts(titleA);
-            const amtsB = extractAmounts(titleB);
-            if (amtsA.length > 0 && amtsB.length > 0 && amtsA.some(a => amtsB.includes(a))) return true;
-
-            const sigsA = extractTopicSignals(titleA);
-            const sigsB = extractTopicSignals(titleB);
-            if (sigsA.length > 0 && sigsB.length > 0 && sigsA.some(s => sigsB.includes(s))) return true;
-
-            const wordsA = fingerprintTitle(titleA);
-            const wordsB = fingerprintTitle(titleB);
-            if (wordsA.size === 0 || wordsB.size === 0) return false;
-            const overlap = [...wordsA].filter(w => wordsB.has(w)).length;
-            return overlap / Math.min(wordsA.size, wordsB.size) >= 0.45;
-        }
-
-        async function generateInsightsForCategory(articles, categoryLabel, categoryContext) {
-            if (articles.length === 0) return articles;
-
-            const prompt = `You are a strategic analyst supporting a consulting team working with Sony Interactive Entertainment (SIE).
-
-For each article below, write a single concise sentence explaining WHY it matters specifically to SIE's ${categoryLabel} business.
-The insight must be directly grounded in what the article is actually about — do not give generic statements.
-Category context: ${categoryContext}
-
-Articles:
-${articles.map((a, i) => `[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt}`).join('\n\n')}
-
-Respond ONLY with a JSON array of objects with keys "index" (number) and "insight" (string).
-Example: [{"index":0,"insight":"..."},{"index":1,"insight":"..."}]
-No markdown, no explanation, JSON only.`;
-
-            try {
-                const claudeUrl = 'https://api.anthropic.com/v1/messages';
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(claudeUrl);
-
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [{ role: 'user', content: prompt }]
-                    })
-                });
-
-                const data = await response.json();
-                const text = data.content?.[0]?.text || '[]';
-                const results = JSON.parse(text.replace(/```json|```/g, '').trim());
-
-                return articles.map((a, i) => {
-                    const match = results.find(r => r.index === i);
-                    return { ...a, whyItMatters: match?.insight || null };
-                });
-
-            } catch (e) {
-                console.error('Claude insight generation failed:', e);
-                return articles.map(a => ({ ...a, whyItMatters: null }));
-            }
-        }
-
-        function setStatus(text, type = 'ready') {
-            document.getElementById('status-text').textContent = text;
-            document.getElementById('status-dot').className = 'status-dot ' + (type === 'loading' ? 'loading' : type === 'error' ? 'error' : '');
-        }
-        function showError(msg) { document.getElementById('error-container').innerHTML = `<div class="error-message">${msg}</div>`; }
-        function clearMessages() { document.getElementById('error-container').innerHTML = ''; }
-        function updateTimestamp() {
-            document.getElementById('timestamp').textContent = new Date().toLocaleString('en-US', {
-                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-        }
-
-        async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeoutMs);
-            try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(timer);
-                return response;
-            } catch (e) {
-                clearTimeout(timer);
-                throw e;
-            }
-        }
-
-        async function fetchWithProxy(apiUrl, proxyIndex = 0) {
-            if (proxyIndex >= PROXIES.length) throw new Error('All proxies failed');
-            try {
-                const proxyUrl = PROXIES[proxyIndex] + encodeURIComponent(apiUrl);
-                const response = await fetchWithTimeout(proxyUrl, {}, 10000);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                return data.contents ? JSON.parse(data.contents) : data;
-            } catch (e) {
-                console.warn(`Proxy ${proxyIndex} failed, trying next...`, e.message);
-                return fetchWithProxy(apiUrl, proxyIndex + 1);
-            }
-        }
-
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMins / 60);
-                const diffDays = Math.floor(diffHours / 24);
-                if (diffMins < 1) return 'Just now';
-                if (diffMins < 60) return `${diffMins}m ago`;
-                if (diffHours < 24) return `${diffHours}h ago`;
-                if (diffDays < 7) return `${diffDays}d ago`;
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            } catch
+    const GAMES_SIGNALS = [
+        'playstation exclusive','ps5 exclusive','sony exclusive',
+        'first-party game','first party game',
+        'playstation studios','sony santa monica','naughty dog',
+        'insomniac','
