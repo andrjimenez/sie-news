@@ -45,6 +45,11 @@
         .stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1; }
 
+        .source-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+        .source-pill { font-family: var(--font-mono); font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid var(--gray-200); color: var(--gray-400); }
+        .source-pill.active { border-color: #4caf50; color: #2e7d32; background: #e8f5e9; }
+        .source-pill.failed { border-color: var(--red); color: var(--red); background: #fce4ec; }
+
         .toolbar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .filter-label { font-size: 0.72rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.25rem; white-space: nowrap; }
         .filter-btn { font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600); cursor: pointer; transition: all var(--transition); }
@@ -85,9 +90,6 @@
         .article-title { display: block; font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.45; text-decoration: none; margin-bottom: 0.45rem; transition: color var(--transition); }
         .article-title:hover { color: var(--navy-light); }
         .article-excerpt { font-size: 0.82rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 0.65rem; }
-        .insight-box { background: var(--accent); border-left: 3px solid var(--navy-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.5rem 0.75rem; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: flex-start; }
-        .insight-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-mid); white-space: nowrap; padding-top: 0.1rem; flex-shrink: 0; }
-        .insight-text { font-size: 0.82rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
         .article-link { font-family: var(--font-mono); font-size: 0.68rem; color: var(--navy-light); text-decoration: none; font-weight: 600; letter-spacing: 0.02em; transition: color var(--transition); }
         .article-link:hover { color: var(--navy); text-decoration: underline; }
 
@@ -113,6 +115,7 @@
             .page { padding: 1rem 1rem 3rem; }
             .timestamp { display: none; }
             .score-badge { display: none; }
+            .source-pills { display: none; }
         }
     </style>
 </head>
@@ -140,6 +143,9 @@
         <div class="stat"><span class="stat-label">Relevant (6–10)</span><span class="stat-value" id="stat-relevant">—</span></div>
         <div class="stat"><span class="stat-label">Avg. score</span><span class="stat-value" id="stat-avg">—</span></div>
     </div>
+
+    <div class="source-pills" id="source-pills"></div>
+
     <div class="toolbar">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" data-filter="">All relevant</button>
@@ -150,21 +156,21 @@
         <button class="filter-btn" data-filter="industry">Industry</button>
         <button class="refresh-btn" id="refresh-btn"><span class="icon">⟳</span> Refresh feed</button>
     </div>
+
     <div class="error-banner" id="error-banner"></div>
     <div id="feed"></div>
 </div>
 
 <script>
-const NEWS_API_KEY = '49f62eab61c1478086ac707012433080';
-const CACHE_KEY    = 'sie_v8_cache';
-const CACHE_TTL    = 30 * 60 * 1000;
-const MIN_SCORE    = 6;
+const CONFIG = {
+    gnews:    { key: '7c911a322807e7fc9b37994748abe439', enabled: true },
+    guardian: { key: 'test', enabled: true },
+    rss:      { enabled: true }
+};
 
-const PROXIES = [
-    'https://api.allorigins.win/get?url=',
-    'https://corsproxy.io/?',
-    'https://api.codetabs.com/v1/proxy?quest='
-];
+const CACHE_KEY = 'sie_v9_cache';
+const CACHE_TTL = 30 * 60 * 1000;
+const MIN_SCORE = 6;
 
 const CATEGORIES = {
     hardware:  { label: 'Hardware',      desc: 'Console Hardware, Devices & Technology',   icon: '🎮' },
@@ -174,42 +180,85 @@ const CATEGORIES = {
     industry:  { label: 'Industry',      desc: 'Gaming Industry & Competitive Landscape',  icon: '🏭' }
 };
 
-const COMPETITOR_TERMS = [
-    'xbox','microsoft gaming','game pass','activision','bethesda',
-    'nintendo','switch 2','nintendo direct','mario','zelda',
-    'steam deck','valve','epic games','epic store',
-    'take-two','rockstar','ea games','electronic arts','ubisoft',
-    'square enix','capcom','sega','bandai namco','konami',
-    'summer game fest','the game awards','gdc'
+const SOURCES = [
+    {
+        id: 'gnews', label: 'GNews',
+        fetch: async () => {
+            if(!CONFIG.gnews.enabled) return [];
+            const queries = ['Sony PlayStation','PlayStation 5 PS5','Sony gaming earnings','PlayStation Plus','Sony Bungie','PlayStation 6','Xbox gaming','Nintendo Switch'];
+            const results = await Promise.allSettled(queries.map(q =>
+                fetchJson(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&apikey=${CONFIG.gnews.key}`)
+            ));
+            return results.flatMap(r => r.status==='fulfilled' ? (r.value?.articles||[]).map(a => ({
+                title: a.title, source: a.source?.name||'GNews',
+                date: formatDate(a.publishedAt), excerpt: a.description||'', url: a.url
+            })) : []);
+        }
+    },
+    {
+        id: 'guardian', label: 'The Guardian',
+        fetch: async () => {
+            if(!CONFIG.guardian.enabled) return [];
+            const queries = ['Sony PlayStation','PlayStation gaming','Sony Interactive Entertainment','Xbox gaming industry','Nintendo gaming'];
+            const results = await Promise.allSettled(queries.map(q =>
+                fetchJson(`https://content.guardianapis.com/search?q=${encodeURIComponent(q)}&api-key=${CONFIG.guardian.key}&page-size=10&show-fields=trailText&order-by=newest`)
+            ));
+            return results.flatMap(r => r.status==='fulfilled' ? (r.value?.response?.results||[]).map(a => ({
+                title: a.webTitle, source: 'The Guardian',
+                date: formatDate(a.webPublicationDate), excerpt: a.fields?.trailText||'', url: a.webUrl
+            })) : []);
+        }
+    },
+    {
+        id: 'rss', label: 'RSS Feeds',
+        fetch: async () => {
+            if(!CONFIG.rss.enabled) return [];
+            const feeds = [
+                { url: 'https://www.gamesindustry.biz/feed',    source: 'GamesIndustry.biz' },
+                { url: 'https://www.eurogamer.net/feed',         source: 'Eurogamer' },
+                { url: 'https://www.vgc.com/feed',               source: 'VGC' },
+                { url: 'https://kotaku.com/rss',                 source: 'Kotaku' },
+                { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge' },
+                { url: 'https://arstechnica.com/feed/',          source: 'Ars Technica' }
+            ];
+            const results = await Promise.allSettled(feeds.map(f => fetchRSS(f.url, f.source)));
+            return results.flatMap(r => r.status==='fulfilled' ? r.value : []);
+        }
+    }
 ];
-const hasCompetitor = text => COMPETITOR_TERMS.some(t => text.includes(t));
 
-const QUERIES = [
-    'Sony Interactive Entertainment news 2025',
-    'PlayStation 5 PS5 news hardware',
-    'Sony PlayStation exclusive game release',
-    'PlayStation Plus PS+ subscription Sony',
-    'Sony gaming earnings financial results quarterly',
-    'Sony Bungie Marathon impairment write-down',
-    'PlayStation 6 PS6 next gen Sony console',
-    'Sony PlayStation layoff restructure job cuts',
-    'PlayStation Network PSN online service',
-    'Sony PlayStation lawsuit settlement antitrust',
-    'Naughty Dog Insomniac Guerrilla Sony game announcement',
-    'God of War Horizon Spider-Man PlayStation new game',
-    'Sony gaming CEO executive leadership appointed',
-    'Xbox Game Pass Microsoft gaming industry news',
-    'Nintendo Switch 2 gaming market',
-    'video game industry market trends publisher 2025',
-    'PS5 Pro DualSense hardware specs sales',
-    'Sony acquisition partnership studio deal',
-    'Sony Bungie impairment loss Marathon game'
-];
+const withTimeout = (url, opts={}, ms=12000) => {
+    const c=new AbortController(), t=setTimeout(()=>c.abort(), ms);
+    return fetch(url, {...opts, signal:c.signal}).then(r=>{clearTimeout(t);return r;}).catch(e=>{clearTimeout(t);throw e;});
+};
 
-const BLOCKED = ['alltoc','the sun','dailystar','dailymail','attack of the fanboy','wegotthiscovered','givemesport','sportskeeda','clutchpoints','ninja journalism'];
-const isReputable = a => {
-    const s=(a.source?.name||'').toLowerCase(), u=(a.url||'').toLowerCase();
-    return !BLOCKED.some(b => s.includes(b) || u.includes(b));
+const fetchJson = async url => {
+    try {
+        const r = await withTimeout(url, {}, 12000);
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+    } catch(e) { console.warn(`fetchJson failed: ${e.message}`); return null; }
+};
+
+const fetchRSS = async (feedUrl, sourceName) => {
+    try {
+        const r = await withTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`, {}, 12000);
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = await r.json();
+        if(!d.contents) return [];
+        const doc = new DOMParser().parseFromString(d.contents, 'text/xml');
+        const items = [...doc.querySelectorAll('item, entry')];
+        return items.slice(0,15).map(item => {
+            const get = tag => item.querySelector(tag)?.textContent?.trim()||'';
+            return {
+                title:   get('title'),
+                source:  sourceName,
+                date:    formatDate(get('pubDate')||get('published')||get('updated')),
+                excerpt: (get('description')||get('summary')||get('content')).replace(/<[^>]+>/g,'').substring(0,300),
+                url:     get('link')||item.querySelector('link')?.getAttribute('href')||''
+            };
+        }).filter(a => a.title && a.url);
+    } catch(e) { console.warn(`RSS failed for ${sourceName}: ${e.message}`); return []; }
 };
 
 const fingerprint = t => {
@@ -218,102 +267,30 @@ const fingerprint = t => {
 };
 const extractAmts = t => (t.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi)||[]).map(n=>n.replace(/[mb]/i,'').toLowerCase());
 const isSameStory = (a,b) => {
-    const amA=extractAmts(a), amB=extractAmts(b);
+    const amA=extractAmts(a),amB=extractAmts(b);
     if(amA.length&&amB.length&&amA.some(x=>amB.includes(x))) return true;
-    const wA=fingerprint(a), wB=fingerprint(b);
+    const wA=fingerprint(a),wB=fingerprint(b);
     if(!wA.size||!wB.size) return false;
-    return [...wA].filter(w=>wB.has(w)).length / Math.min(wA.size,wB.size) >= 0.45;
+    return [...wA].filter(w=>wB.has(w)).length/Math.min(wA.size,wB.size)>=0.45;
 };
 
-const withTimeout = (url, opts={}, ms=12000) => {
-    const c=new AbortController(), t=setTimeout(()=>c.abort(), ms);
-    return fetch(url, {...opts, signal:c.signal})
-        .then(r => { clearTimeout(t); return r; })
-        .catch(e => { clearTimeout(t); throw e; });
-};
-
-const fetchProxy = async (url, idx=0) => {
-    if(idx >= PROXIES.length) throw new Error('All proxies failed');
-    try {
-        const proxyUrl = PROXIES[idx] + encodeURIComponent(url);
-        console.log(`[Proxy ${idx}] Trying: ${PROXIES[idx].split('/')[2]}`);
-        const res = await withTimeout(proxyUrl, {}, 12000);
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const raw = await res.json();
-        const data = raw.contents ? JSON.parse(raw.contents) : raw;
-        return data;
-    } catch(e) {
-        console.warn(`[Proxy ${idx}] Failed: ${e.message}`);
-        return fetchProxy(url, idx+1);
-    }
-};
-
-const fetchQuery = async q => {
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
-    try {
-        const d = await fetchProxy(url);
-        if(d.status === 'error') {
-            console.error(`[NewsAPI] Error for "${q}": ${d.message}`);
-            return [];
-        }
-        console.log(`[Query] "${q}" → ${(d.articles||[]).length} articles`);
-        return d.articles || [];
-    } catch(e) {
-        console.error(`[Query] Failed "${q}": ${e.message}`);
-        return [];
-    }
-};
+const COMPETITOR_TERMS = ['xbox','microsoft gaming','game pass','activision','bethesda','nintendo','switch 2','nintendo direct','mario','zelda','steam deck','valve','epic games','epic store','take-two','rockstar','ea games','electronic arts','ubisoft','square enix','capcom','sega','bandai namco','konami','summer game fest','the game awards','gdc'];
+const hasCompetitor = t => COMPETITOR_TERMS.some(k=>t.includes(k));
 
 const keywordScore = a => {
-    const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
-    const s10 = [
-        'impairment charge','write-down','writedown','write down',
-        'acquisition','acquires','acquired','merger','takeover','buyout',
-        'earnings','quarterly results','financial results','annual results','operating loss',
-        'net income','operating income','revenue miss','revenue beat',
-        'layoff','layoffs','job cuts','redundancies','restructuring',
-        'class action','antitrust','settlement','regulatory fine','lawsuit',
-        'ceo','chief executive','cfo','chief financial','appointed','steps down','resigns',
-        'ps5 price','playstation price','console price','price increase','price cut',
-        'ps6','playstation 6','next gen console','next-gen sony',
-        'studio closure','studio shut','game cancelled','game shutdown',
-        'bungie impairment','concord shutdown','marathon cancell',
-        'sony interactive entertainment','sie strategy','sony gaming strategy',
-        'investor','shareholder','stock','share price','fiscal year','fiscal quarter'
-    ];
+    const t = `${a.title} ${a.excerpt}`.toLowerCase();
+    const s10 = ['impairment charge','write-down','writedown','write down','acquisition','acquires','acquired','merger','takeover','buyout','earnings','quarterly results','financial results','annual results','operating loss','net income','operating income','revenue miss','revenue beat','layoff','layoffs','job cuts','redundancies','restructuring','class action','antitrust','settlement','regulatory fine','lawsuit','ceo','chief executive','cfo','chief financial','appointed','steps down','resigns','ps5 price','playstation price','console price','price increase','price cut','ps6','playstation 6','next gen console','studio closure','studio shut','game cancelled','game shutdown','bungie impairment','concord shutdown','sony interactive entertainment','investor','shareholder','fiscal year','fiscal quarter','share price'];
     if(s10.some(k=>t.includes(k))) return 10;
-    const s8 = [
-        'game pass price','game pass subscribers','xbox game pass',
-        'nintendo switch 2','switch 2 launch','switch 2 sales',
-        'ps plus subscribers','ps+ subscribers','playstation subscribers',
-        'psn outage','psn down','playstation network outage',
-        'ps5 sales','ps5 units','console sales','hardware sales',
-        'sony revenue','sony profit','sony fiscal','sony earnings',
-        'playstation market','gaming market share','microsoft gaming',
-        'activision deal','bethesda','exclusive deal','timed exclusive',
-        'naughty dog','insomniac','guerrilla games','santa monica studio',
-        'housemarque','bluepoint','firesprite','bungie',
-        'sony acquisition','sony studio','sony partnership',
-        'playstation exclusive','ps5 exclusive','sony exclusive'
-    ];
+    const s8 = ['game pass price','game pass subscribers','xbox game pass','nintendo switch 2','switch 2 launch','switch 2 sales','ps plus subscribers','ps+ subscribers','playstation subscribers','psn outage','psn down','ps5 sales','ps5 units','console sales','hardware sales','sony revenue','sony profit','sony fiscal','sony earnings','playstation market','gaming market share','microsoft gaming','naughty dog','insomniac','guerrilla games','santa monica studio','housemarque','bluepoint','firesprite','bungie','sony acquisition','sony studio','sony partnership','playstation exclusive','ps5 exclusive','sony exclusive'];
     if(s8.some(k=>t.includes(k))) return 8;
-    const s6 = [
-        'god of war','spider-man','horizon','the last of us','ghost of tsushima',
-        'gran turismo','astro bot','helldivers','ratchet','returnal',
-        'game launch','game release','game announcement','game reveal',
-        'ps plus games','playstation plus games','monthly games',
-        'dualsense','psvr','ps5 pro','ps5 slim','playstation store',
-        'gaming industry','video game industry','gaming market',
-        'nintendo','xbox','steam','epic games','take-two','ubisoft',
-        'game developer','game publisher','gaming revenue'
-    ];
+    const s6 = ['god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','astro bot','helldivers','ratchet','returnal','game launch','game release','game announcement','game reveal','ps plus games','playstation plus games','dualsense','psvr','ps5 pro','ps5 slim','playstation store','gaming industry','video game industry','gaming market','nintendo','xbox','steam','epic games','take-two','ubisoft','game developer','game publisher','gaming revenue'];
     if(s6.some(k=>t.includes(k))) return 6;
     if(['sony','playstation','ps5','ps4','psn','ps plus'].some(k=>t.includes(k))) return 4;
     return 2;
 };
 
-const fallbackCategory = a => {
-    const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
+const categorise = a => {
+    const t = `${a.title} ${a.excerpt}`.toLowerCase();
     if(hasCompetitor(t)) return 'industry';
     const corp = ['earnings','revenue','profit','acquisition','acquires','acquired','merger','layoff','layoffs','job cuts','ceo','chief executive','cfo','lawsuit','settlement','impairment','write-down','restructuring','fiscal','shareholder','investor','bungie impairment','studio closure','studio shut','game cancelled','game shutdown'];
     if(corp.some(k=>t.includes(k))) return 'corporate';
@@ -325,50 +302,46 @@ const fallbackCategory = a => {
     return 'games';
 };
 
-const enrichBatch = async articles => {
-    if(!articles.length) return articles;
-    return articles.map(a => ({ ...a, score: keywordScore(a), category: fallbackCategory(a), insight: null }));
-};
-
-const saveCache = d => { try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data:d})); } catch(e) {} };
+const saveCache = d => { try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(),data:d})); } catch(e){} };
 const loadCache = () => {
     try {
-        const r = sessionStorage.getItem(CACHE_KEY);
-        if(!r) return null;
-        const {ts, data} = JSON.parse(r);
-        return Date.now() - ts > CACHE_TTL ? null : data;
-    } catch(e) { return null; }
+        const r=sessionStorage.getItem(CACHE_KEY); if(!r) return null;
+        const {ts,data}=JSON.parse(r);
+        return Date.now()-ts>CACHE_TTL?null:data;
+    } catch(e){return null;}
 };
 
-let allArticles = [], currentFilter = '';
+let allArticles=[], currentFilter='';
 const el = id => document.getElementById(id);
-const setStatus = (txt, type='ready') => {
-    el('status-text').textContent = txt;
-    el('status-dot').className = `status-dot${type==='loading'?' loading':type==='error'?' error':''}`;
-};
-const showError = msg => { const e=el('error-banner'); e.textContent=msg; e.classList.toggle('visible', !!msg); };
+const setStatus = (txt,type='ready') => { el('status-text').textContent=txt; el('status-dot').className=`status-dot${type==='loading'?' loading':type==='error'?' error':''}`; };
+const showError = msg => { const e=el('error-banner'); e.textContent=msg; e.classList.toggle('visible',!!msg); };
 const formatDate = ds => {
+    if(!ds) return '';
     try {
-        const d=new Date(ds), now=new Date(), m=Math.floor((now-d)/60000), h=Math.floor(m/60), day=Math.floor(h/24);
+        const d=new Date(ds),now=new Date(),m=Math.floor((now-d)/60000),h=Math.floor(m/60),day=Math.floor(h/24);
+        if(isNaN(m)) return '';
         if(m<1) return 'just now'; if(m<60) return `${m}m ago`;
         if(h<24) return `${h}h ago`; if(day<7) return `${day}d ago`;
-        return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-    } catch(e) { return ''; }
+        return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    } catch(e){return '';}
 };
 const scoreClass = s => s>=10?'s10':s>=9?'s9':s>=8?'s8':s>=7?'s7':s>=6?'s6':'slow';
 
 const updateStats = articles => {
-    const rel = articles.filter(a=>a.score>=MIN_SCORE);
-    const scores = rel.map(a=>a.score);
-    const avg = scores.length ? (scores.reduce((s,x)=>s+x,0)/scores.length).toFixed(1) : '—';
-    el('stat-total').textContent = articles.length;
-    el('stat-relevant').textContent = rel.length;
-    el('stat-avg').textContent = avg;
-    el('stats-bar').style.display = 'flex';
+    const rel=articles.filter(a=>a.score>=MIN_SCORE), scores=rel.map(a=>a.score);
+    const avg=scores.length?(scores.reduce((s,x)=>s+x,0)/scores.length).toFixed(1):'—';
+    el('stat-total').textContent=articles.length; el('stat-relevant').textContent=rel.length;
+    el('stat-avg').textContent=avg; el('stats-bar').style.display='flex';
+};
+
+const updateSourcePills = statuses => {
+    el('source-pills').innerHTML = statuses.map(s =>
+        `<span class="source-pill ${s.ok?'active':'failed'}">${s.label}: ${s.ok?s.count+' articles':'unavailable'}</span>`
+    ).join('');
 };
 
 const renderSkeletons = () => {
-    el('feed').innerHTML = [1,2,3,4,5].map(() => `
+    el('feed').innerHTML=[1,2,3,4,5].map(()=>`
         <div class="skeleton-card">
             <div class="skel skel-xs"></div><div class="skel skel-sm"></div>
             <div class="skel skel-sm2"></div><div class="skel skel-md"></div>
@@ -377,22 +350,18 @@ const renderSkeletons = () => {
 };
 
 const renderFeed = () => {
-    const feed = el('feed');
-    const relevant = allArticles.filter(a => a.score >= MIN_SCORE);
-    if(!relevant.length) {
-        feed.innerHTML = '<div class="empty-state">No relevant articles found. Try refreshing.</div>';
-        return;
-    }
-    const grouped = {};
-    Object.keys(CATEGORIES).forEach(k => grouped[k] = []);
-    relevant.forEach(a => { if(grouped[a.category]) grouped[a.category].push(a); });
-
-    feed.innerHTML = Object.entries(CATEGORIES).map(([key, cat]) => {
-        const articles = grouped[key] || [];
-        const hidden = currentFilter && currentFilter !== key ? ' hidden' : '';
-        const body = articles.length === 0
-            ? '<div class="empty-state">No articles in this category</div>'
-            : articles.map(a => `
+    const feed=el('feed');
+    const relevant=allArticles.filter(a=>a.score>=MIN_SCORE);
+    if(!relevant.length){ feed.innerHTML='<div class="empty-state">No relevant articles found. Try refreshing.</div>'; return; }
+    const grouped={};
+    Object.keys(CATEGORIES).forEach(k=>grouped[k]=[]);
+    relevant.forEach(a=>{ if(grouped[a.category]) grouped[a.category].push(a); });
+    feed.innerHTML=Object.entries(CATEGORIES).map(([key,cat])=>{
+        const articles=grouped[key]||[];
+        const hidden=currentFilter&&currentFilter!==key?' hidden':'';
+        const body=articles.length===0
+            ?'<div class="empty-state">No articles in this category</div>'
+            :articles.map(a=>`
                 <div class="article-card">
                     <div class="article-main">
                         <div class="article-meta">
@@ -401,8 +370,7 @@ const renderFeed = () => {
                             <span class="article-date">${a.date}</span>
                         </div>
                         <a class="article-title" href="${a.url}" target="_blank" rel="noopener noreferrer">${a.title}</a>
-                        <p class="article-excerpt">${(a.excerpt||'').substring(0,200)}${(a.excerpt||'').length>200?'…':''}</p>
-                        ${a.insight ? `<div class="insight-box"><span class="insight-label">Why it Matters</span><span class="insight-text">${a.insight}</span></div>` : ''}
+                        <p class="article-excerpt">${a.excerpt.substring(0,200)}${a.excerpt.length>200?'…':''}</p>
                         <a class="article-link" href="${a.url}" target="_blank" rel="noopener noreferrer">Read full article →</a>
                     </div>
                     <div class="score-badge ${scoreClass(a.score)}">${a.score}</div>
@@ -423,86 +391,62 @@ const renderFeed = () => {
 };
 
 const applyFilter = f => {
-    currentFilter = f;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter===f));
-    document.querySelectorAll('.category-group').forEach(g => g.classList.toggle('hidden', f!==''&&g.dataset.category!==f));
+    currentFilter=f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
+    document.querySelectorAll('.category-group').forEach(g=>g.classList.toggle('hidden',f!==''&&g.dataset.category!==f));
 };
 
 const refresh = async (force=false) => {
-    const btn = el('refresh-btn');
-    btn.disabled = true; btn.classList.add('spinning');
-    setStatus('Fetching…', 'loading'); showError('');
+    const btn=el('refresh-btn');
+    btn.disabled=true; btn.classList.add('spinning');
+    setStatus('Fetching…','loading'); showError('');
 
-    if(!force) {
-        const cached = loadCache();
-        if(cached) {
-            allArticles = cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter);
-            el('timestamp').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-            setStatus('Ready', 'ready'); btn.disabled=false; btn.classList.remove('spinning');
-            return;
-        }
+    if(!force){
+        const cached=loadCache();
+        if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter);
+            el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+            setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; }
     }
 
     try {
         renderSkeletons();
-        console.log(`[Dashboard] Fetching ${QUERIES.length} queries in parallel...`);
-        const raw = await Promise.allSettled(QUERIES.map(q => fetchQuery(q)));
+        const sourceResults=await Promise.allSettled(SOURCES.map(s=>s.fetch()));
+        updateSourcePills(SOURCES.map((s,i)=>({
+            label: s.label,
+            ok:    sourceResults[i].status==='fulfilled'&&sourceResults[i].value.length>0,
+            count: sourceResults[i].status==='fulfilled'?sourceResults[i].value.length:0
+        })));
 
-        const seenUrls = new Set(), seenTitles = [], pool = [];
-        raw.forEach(r => {
-            if(r.status !== 'fulfilled') return;
-            for(const a of r.value) {
-                if(!a.url || seenUrls.has(a.url)) continue;
-                if(!isReputable(a)) continue;
-                if(seenTitles.some(t => isSameStory(t, a.title))) continue;
-                seenUrls.add(a.url); seenTitles.push(a.title);
-                pool.push({
-                    title: a.title, source: a.source.name,
-                    date: formatDate(a.publishedAt), excerpt: a.description||'',
-                    url: a.url, score: 0, category: 'industry', insight: null
-                });
+        const seenUrls=new Set(),seenTitles=[],pool=[];
+        sourceResults.forEach(r=>{
+            if(r.status!=='fulfilled') return;
+            for(const a of r.value){
+                if(!a.url||!a.title||seenUrls.has(a.url)) continue;
+                if(seenTitles.some(t=>isSameStory(t,a.title))) continue;
+                seenUrls.add(a.url); seenTitles.push(a.title); pool.push(a);
             }
         });
 
-        console.log(`[Dashboard] Pool after dedup: ${pool.length} articles`);
+        console.log(`[Dashboard] ${pool.length} articles after dedup`);
+        if(!pool.length){ showError('All news sources unavailable. Check F12 → Console for details.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
 
-        if(!pool.length) {
-            showError('No articles found. Open F12 → Console to see which proxy is failing.');
-            setStatus('Error', 'error'); btn.disabled=false; btn.classList.remove('spinning');
-            return;
-        }
-
-        setStatus('Categorising…', 'loading');
-        const enriched = [], BATCH = 15;
-        for(let i=0; i<pool.length; i+=BATCH) {
-            enriched.push(...await enrichBatch(pool.slice(i, i+BATCH)));
-        }
-        enriched.sort((a,b) => b.score - a.score);
-        allArticles = enriched;
-
+        allArticles=pool.map(a=>({...a,score:keywordScore(a),category:categorise(a)})).sort((a,b)=>b.score-a.score);
         updateStats(allArticles); renderFeed(); applyFilter(currentFilter); saveCache(allArticles);
-        el('timestamp').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-        setStatus('Ready', 'ready');
-
-    } catch(err) {
-        console.error('[Dashboard] Unexpected error:', err);
-        showError(`Error: ${err.message}`);
-        setStatus('Error', 'error');
-    } finally {
-        btn.disabled = false; btn.classList.remove('spinning');
-    }
+        el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+        setStatus('Ready','ready');
+    } catch(err){
+        console.error('[Dashboard]',err); showError(`Error: ${err.message}`); setStatus('Error','error');
+    } finally { btn.disabled=false; btn.classList.remove('spinning'); }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-    el('refresh-btn').addEventListener('click', () => refresh(true));
-    document.querySelector('.toolbar').addEventListener('click', e => {
-        const btn = e.target.closest('.filter-btn');
-        if(btn) applyFilter(btn.dataset.filter);
+window.addEventListener('DOMContentLoaded',()=>{
+    el('refresh-btn').addEventListener('click',()=>refresh(true));
+    document.querySelector('.toolbar').addEventListener('click',e=>{
+        const btn=e.target.closest('.filter-btn'); if(btn) applyFilter(btn.dataset.filter);
     });
     refresh(false);
 });
-
-setInterval(() => refresh(true), 30 * 60 * 1000);
+setInterval(()=>refresh(true),30*60*1000);
 </script>
 </body>
 </html>
