@@ -40,7 +40,7 @@
 
         .page { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
 
-        .stats-bar { display: none; gap: 2.5rem; padding: 1rem 1.5rem; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
+        .stats-bar { display: none; gap: 2.5rem; padding: 1rem 1.5rem; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
         .stat { display: flex; flex-direction: column; gap: 3px; }
         .stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1; }
@@ -99,6 +99,7 @@
         .s8 {background:#f1f8e9;color:#33691e;border-color:#9ccc65}
         .s7 {background:#fffde7;color:#f57f17;border-color:#ffee58}
         .s6 {background:#fff8e1;color:#ff8f00;border-color:#ffc107}
+        .s5 {background:#fff8e1;color:#ff8f00;border-color:#ffc107}
         .slow{background:var(--gray-100);color:var(--gray-400);border-color:var(--gray-200)}
 
         .skeleton-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; margin-bottom: 0.625rem; box-shadow: var(--shadow-sm); }
@@ -140,12 +141,10 @@
 <div class="page">
     <div class="stats-bar" id="stats-bar">
         <div class="stat"><span class="stat-label">Articles found</span><span class="stat-value" id="stat-total">—</span></div>
-        <div class="stat"><span class="stat-label">Relevant (6–10)</span><span class="stat-value" id="stat-relevant">—</span></div>
+        <div class="stat"><span class="stat-label">Relevant (5–10)</span><span class="stat-value" id="stat-relevant">—</span></div>
         <div class="stat"><span class="stat-label">Avg. score</span><span class="stat-value" id="stat-avg">—</span></div>
     </div>
-
     <div class="source-pills" id="source-pills"></div>
-
     <div class="toolbar">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" data-filter="">All relevant</button>
@@ -156,7 +155,6 @@
         <button class="filter-btn" data-filter="industry">Industry</button>
         <button class="refresh-btn" id="refresh-btn"><span class="icon">⟳</span> Refresh feed</button>
     </div>
-
     <div class="error-banner" id="error-banner"></div>
     <div id="feed"></div>
 </div>
@@ -168,9 +166,9 @@ const CONFIG = {
     rss:      { enabled: true }
 };
 
-const CACHE_KEY = 'sie_v9_cache';
+const CACHE_KEY = 'sie_v10_cache';
 const CACHE_TTL = 30 * 60 * 1000;
-const MIN_SCORE = 6;
+const MIN_SCORE = 5;
 
 const CATEGORIES = {
     hardware:  { label: 'Hardware',      desc: 'Console Hardware, Devices & Technology',   icon: '🎮' },
@@ -182,31 +180,31 @@ const CATEGORIES = {
 
 const SOURCES = [
     {
-        id: 'gnews', label: 'GNews',
-        fetch: async () => {
-            if(!CONFIG.gnews.enabled) return [];
-            const queries = ['Sony PlayStation','PlayStation 5 PS5','Sony gaming earnings','PlayStation Plus','Sony Bungie','PlayStation 6','Xbox gaming','Nintendo Switch'];
-            const results = await Promise.allSettled(queries.map(q =>
-                fetchJson(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&apikey=${CONFIG.gnews.key}`)
-            ));
-            return results.flatMap(r => r.status==='fulfilled' ? (r.value?.articles||[]).map(a => ({
-                title: a.title, source: a.source?.name||'GNews',
-                date: formatDate(a.publishedAt), excerpt: a.description||'', url: a.url
-            })) : []);
-        }
-    },
-    {
         id: 'guardian', label: 'The Guardian',
         fetch: async () => {
             if(!CONFIG.guardian.enabled) return [];
-            const queries = ['Sony PlayStation','PlayStation gaming','Sony Interactive Entertainment','Xbox gaming industry','Nintendo gaming'];
+            const queries = [
+                'Sony PlayStation', 'Sony Interactive Entertainment',
+                'PlayStation 5', 'PlayStation Plus subscription',
+                'Sony gaming earnings revenue', 'Sony Bungie acquisition',
+                'PlayStation 6 next generation', 'Sony gaming layoffs',
+                'PlayStation exclusive game', 'PlayStation Network',
+                'Xbox Game Pass Microsoft', 'Nintendo Switch gaming',
+                'video game industry market', 'Sony studio acquisition',
+                'PlayStation price console'
+            ];
             const results = await Promise.allSettled(queries.map(q =>
-                fetchJson(`https://content.guardianapis.com/search?q=${encodeURIComponent(q)}&api-key=${CONFIG.guardian.key}&page-size=10&show-fields=trailText&order-by=newest`)
+                fetchJson(`https://content.guardianapis.com/search?q=${encodeURIComponent(q)}&api-key=${CONFIG.guardian.key}&page-size=10&show-fields=trailText&order-by=newest&section=technology|business|culture|sport`)
             ));
-            return results.flatMap(r => r.status==='fulfilled' ? (r.value?.response?.results||[]).map(a => ({
-                title: a.webTitle, source: 'The Guardian',
-                date: formatDate(a.webPublicationDate), excerpt: a.fields?.trailText||'', url: a.webUrl
-            })) : []);
+            return results.flatMap(r =>
+                r.status === 'fulfilled' ? (r.value?.response?.results || []).map(a => ({
+                    title:   a.webTitle,
+                    source:  'The Guardian',
+                    date:    formatDate(a.webPublicationDate),
+                    excerpt: a.fields?.trailText || '',
+                    url:     a.webUrl
+                })) : []
+            );
         }
     },
     {
@@ -214,22 +212,59 @@ const SOURCES = [
         fetch: async () => {
             if(!CONFIG.rss.enabled) return [];
             const feeds = [
-                { url: 'https://www.gamesindustry.biz/feed',    source: 'GamesIndustry.biz' },
-                { url: 'https://www.eurogamer.net/feed',         source: 'Eurogamer' },
-                { url: 'https://www.vgc.com/feed',               source: 'VGC' },
-                { url: 'https://kotaku.com/rss',                 source: 'Kotaku' },
-                { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge' },
-                { url: 'https://arstechnica.com/feed/',          source: 'Ars Technica' }
+                { url: 'https://www.gamesindustry.biz/feed',         source: 'GamesIndustry.biz' },
+                { url: 'https://www.eurogamer.net/feed',              source: 'Eurogamer' },
+                { url: 'https://www.vgc.com/feed',                    source: 'VGC' },
+                { url: 'https://kotaku.com/rss',                      source: 'Kotaku' },
+                { url: 'https://www.theverge.com/rss/index.xml',      source: 'The Verge' },
+                { url: 'https://arstechnica.com/gaming/feed/',        source: 'Ars Technica' },
+                { url: 'https://www.polygon.com/rss/index.xml',       source: 'Polygon' },
+                { url: 'https://feeds.feedburner.com/ign/all',        source: 'IGN' }
             ];
-            const results = await Promise.allSettled(feeds.map(f => fetchRSS(f.url, f.source)));
-            return results.flatMap(r => r.status==='fulfilled' ? r.value : []);
+            const results = await Promise.allSettled(feeds.map(f =>
+                fetchJson(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}&count=15`)
+                    .then(d => (d?.items || []).map(item => ({
+                        title:   item.title || '',
+                        source:  f.source,
+                        date:    formatDate(item.pubDate),
+                        excerpt: (item.description || item.content || '').replace(/<[^>]+>/g,'').substring(0,300),
+                        url:     item.link || item.guid || ''
+                    })))
+            ));
+            return results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+        }
+    },
+    {
+        id: 'gnews', label: 'GNews',
+        fetch: async () => {
+            if(!CONFIG.gnews.enabled) return [];
+            const queries = [
+                'Sony PlayStation news', 'PlayStation 5 hardware',
+                'Sony gaming earnings', 'PlayStation Plus Sony',
+                'Sony Bungie impairment', 'PlayStation 6 PS6',
+                'Xbox Microsoft gaming', 'Nintendo Switch gaming market'
+            ];
+            const results = await Promise.allSettled(queries.map(q =>
+                fetchJson(`https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&lang=en&max=10&apikey=${CONFIG.gnews.key}`)
+            ));
+            return results.flatMap(r =>
+                r.status === 'fulfilled' ? (r.value?.articles || []).map(a => ({
+                    title:   a.title,
+                    source:  a.source?.name || 'GNews',
+                    date:    formatDate(a.publishedAt),
+                    excerpt: a.description || '',
+                    url:     a.url
+                })) : []
+            );
         }
     }
 ];
 
 const withTimeout = (url, opts={}, ms=12000) => {
     const c=new AbortController(), t=setTimeout(()=>c.abort(), ms);
-    return fetch(url, {...opts, signal:c.signal}).then(r=>{clearTimeout(t);return r;}).catch(e=>{clearTimeout(t);throw e;});
+    return fetch(url, {...opts, signal:c.signal})
+        .then(r=>{clearTimeout(t);return r;})
+        .catch(e=>{clearTimeout(t);throw e;});
 };
 
 const fetchJson = async url => {
@@ -237,28 +272,7 @@ const fetchJson = async url => {
         const r = await withTimeout(url, {}, 12000);
         if(!r.ok) throw new Error(`HTTP ${r.status}`);
         return await r.json();
-    } catch(e) { console.warn(`fetchJson failed: ${e.message}`); return null; }
-};
-
-const fetchRSS = async (feedUrl, sourceName) => {
-    try {
-        const r = await withTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`, {}, 12000);
-        if(!r.ok) throw new Error(`HTTP ${r.status}`);
-        const d = await r.json();
-        if(!d.contents) return [];
-        const doc = new DOMParser().parseFromString(d.contents, 'text/xml');
-        const items = [...doc.querySelectorAll('item, entry')];
-        return items.slice(0,15).map(item => {
-            const get = tag => item.querySelector(tag)?.textContent?.trim()||'';
-            return {
-                title:   get('title'),
-                source:  sourceName,
-                date:    formatDate(get('pubDate')||get('published')||get('updated')),
-                excerpt: (get('description')||get('summary')||get('content')).replace(/<[^>]+>/g,'').substring(0,300),
-                url:     get('link')||item.querySelector('link')?.getAttribute('href')||''
-            };
-        }).filter(a => a.title && a.url);
-    } catch(e) { console.warn(`RSS failed for ${sourceName}: ${e.message}`); return []; }
+    } catch(e) { console.warn(`fetchJson failed (${url.substring(0,60)}): ${e.message}`); return null; }
 };
 
 const fingerprint = t => {
@@ -267,9 +281,9 @@ const fingerprint = t => {
 };
 const extractAmts = t => (t.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi)||[]).map(n=>n.replace(/[mb]/i,'').toLowerCase());
 const isSameStory = (a,b) => {
-    const amA=extractAmts(a),amB=extractAmts(b);
+    const amA=extractAmts(a), amB=extractAmts(b);
     if(amA.length&&amB.length&&amA.some(x=>amB.includes(x))) return true;
-    const wA=fingerprint(a),wB=fingerprint(b);
+    const wA=fingerprint(a), wB=fingerprint(b);
     if(!wA.size||!wB.size) return false;
     return [...wA].filter(w=>wB.has(w)).length/Math.min(wA.size,wB.size)>=0.45;
 };
@@ -279,13 +293,13 @@ const hasCompetitor = t => COMPETITOR_TERMS.some(k=>t.includes(k));
 
 const keywordScore = a => {
     const t = `${a.title} ${a.excerpt}`.toLowerCase();
-    const s10 = ['impairment charge','write-down','writedown','write down','acquisition','acquires','acquired','merger','takeover','buyout','earnings','quarterly results','financial results','annual results','operating loss','net income','operating income','revenue miss','revenue beat','layoff','layoffs','job cuts','redundancies','restructuring','class action','antitrust','settlement','regulatory fine','lawsuit','ceo','chief executive','cfo','chief financial','appointed','steps down','resigns','ps5 price','playstation price','console price','price increase','price cut','ps6','playstation 6','next gen console','studio closure','studio shut','game cancelled','game shutdown','bungie impairment','concord shutdown','sony interactive entertainment','investor','shareholder','fiscal year','fiscal quarter','share price'];
+    const s10 = ['impairment','write-down','writedown','write down','acquisition','acquires','acquired','merger','takeover','buyout','earnings','quarterly results','financial results','annual results','operating loss','net income','operating income','revenue miss','revenue beat','layoff','layoffs','job cuts','redundancies','restructuring','class action','antitrust','settlement','regulatory fine','lawsuit','ceo','chief executive','cfo','chief financial','appointed','steps down','resigns','ps5 price','playstation price','console price','price increase','price cut','ps6','playstation 6','next gen console','studio closure','studio shut','game cancelled','game shutdown','bungie impairment','concord shutdown','sony interactive entertainment','investor','shareholder','fiscal year','fiscal quarter','share price','stock price'];
     if(s10.some(k=>t.includes(k))) return 10;
     const s8 = ['game pass price','game pass subscribers','xbox game pass','nintendo switch 2','switch 2 launch','switch 2 sales','ps plus subscribers','ps+ subscribers','playstation subscribers','psn outage','psn down','ps5 sales','ps5 units','console sales','hardware sales','sony revenue','sony profit','sony fiscal','sony earnings','playstation market','gaming market share','microsoft gaming','naughty dog','insomniac','guerrilla games','santa monica studio','housemarque','bluepoint','firesprite','bungie','sony acquisition','sony studio','sony partnership','playstation exclusive','ps5 exclusive','sony exclusive'];
     if(s8.some(k=>t.includes(k))) return 8;
-    const s6 = ['god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','astro bot','helldivers','ratchet','returnal','game launch','game release','game announcement','game reveal','ps plus games','playstation plus games','dualsense','psvr','ps5 pro','ps5 slim','playstation store','gaming industry','video game industry','gaming market','nintendo','xbox','steam','epic games','take-two','ubisoft','game developer','game publisher','gaming revenue'];
+    const s6 = ['god of war','spider-man','horizon','the last of us','ghost of tsushima','gran turismo','astro bot','helldivers','ratchet','returnal','game launch','game release','game announcement','game reveal','ps plus games','playstation plus games','dualsense','psvr','ps5 pro','ps5 slim','playstation store','gaming industry','video game industry','gaming market','nintendo','xbox','steam','epic games','take-two','ubisoft','game developer','game publisher','gaming revenue','saros','lego horizon'];
     if(s6.some(k=>t.includes(k))) return 6;
-    if(['sony','playstation','ps5','ps4','psn','ps plus'].some(k=>t.includes(k))) return 4;
+    if(['sony','playstation','ps5','ps4','psn','ps plus'].some(k=>t.includes(k))) return 5;
     return 2;
 };
 
@@ -295,7 +309,7 @@ const categorise = a => {
     const corp = ['earnings','revenue','profit','acquisition','acquires','acquired','merger','layoff','layoffs','job cuts','ceo','chief executive','cfo','lawsuit','settlement','impairment','write-down','restructuring','fiscal','shareholder','investor','bungie impairment','studio closure','studio shut','game cancelled','game shutdown'];
     if(corp.some(k=>t.includes(k))) return 'corporate';
     if(['playstation plus','ps plus','psn outage','psn down','playstation network','playstation subscription','ps+ subscribers'].some(k=>t.includes(k))) return 'network';
-    const game = ['exclusive game','ps5 exclusive','playstation exclusive','sony exclusive','first-party','game launch','game release','game reveal','game announcement','game download','free game','ps store','playstation store game','god of war','spider-man','horizon','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet','returnal','naughty dog','insomniac','guerrilla','housemarque','bluepoint','saros','playstation studios'];
+    const game = ['exclusive game','ps5 exclusive','playstation exclusive','sony exclusive','first-party','game launch','game release','game reveal','game announcement','game download','free game','ps store','playstation store game','god of war','spider-man','horizon','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet','returnal','naughty dog','insomniac','guerrilla','housemarque','bluepoint','saros','playstation studios','lego horizon'];
     if(game.some(k=>t.includes(k))) return 'games';
     if(['ps5 pro','ps5 slim','dualsense','psvr','ps6 specs','ps6 hardware','next gen console','console price','hardware sales','console sales'].some(k=>t.includes(k))) return 'hardware';
     if(['ps6','playstation 6','ps5'].some(k=>t.includes(k))) return 'hardware';
@@ -308,7 +322,7 @@ const loadCache = () => {
         const r=sessionStorage.getItem(CACHE_KEY); if(!r) return null;
         const {ts,data}=JSON.parse(r);
         return Date.now()-ts>CACHE_TTL?null:data;
-    } catch(e){return null;}
+    } catch(e){ return null; }
 };
 
 let allArticles=[], currentFilter='';
@@ -323,9 +337,9 @@ const formatDate = ds => {
         if(m<1) return 'just now'; if(m<60) return `${m}m ago`;
         if(h<24) return `${h}h ago`; if(day<7) return `${day}d ago`;
         return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    } catch(e){return '';}
+    } catch(e){ return ''; }
 };
-const scoreClass = s => s>=10?'s10':s>=9?'s9':s>=8?'s8':s>=7?'s7':s>=6?'s6':'slow';
+const scoreClass = s => s>=10?'s10':s>=9?'s9':s>=8?'s8':s>=7?'s7':s>=6?'s6':s>=5?'s5':'slow';
 
 const updateStats = articles => {
     const rel=articles.filter(a=>a.score>=MIN_SCORE), scores=rel.map(a=>a.score);
@@ -335,7 +349,7 @@ const updateStats = articles => {
 };
 
 const updateSourcePills = statuses => {
-    el('source-pills').innerHTML = statuses.map(s =>
+    el('source-pills').innerHTML=statuses.map(s=>
         `<span class="source-pill ${s.ok?'active':'failed'}">${s.label}: ${s.ok?s.count+' articles':'unavailable'}</span>`
     ).join('');
 };
@@ -417,7 +431,7 @@ const refresh = async (force=false) => {
             count: sourceResults[i].status==='fulfilled'?sourceResults[i].value.length:0
         })));
 
-        const seenUrls=new Set(),seenTitles=[],pool=[];
+        const seenUrls=new Set(), seenTitles=[], pool=[];
         sourceResults.forEach(r=>{
             if(r.status!=='fulfilled') return;
             for(const a of r.value){
@@ -428,12 +442,13 @@ const refresh = async (force=false) => {
         });
 
         console.log(`[Dashboard] ${pool.length} articles after dedup`);
-        if(!pool.length){ showError('All news sources unavailable. Check F12 → Console for details.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
+        if(!pool.length){ showError('All sources unavailable. Check F12 → Console for details.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
 
         allArticles=pool.map(a=>({...a,score:keywordScore(a),category:categorise(a)})).sort((a,b)=>b.score-a.score);
         updateStats(allArticles); renderFeed(); applyFilter(currentFilter); saveCache(allArticles);
         el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
         setStatus('Ready','ready');
+
     } catch(err){
         console.error('[Dashboard]',err); showError(`Error: ${err.message}`); setStatus('Error','error');
     } finally { btn.disabled=false; btn.classList.remove('spinning'); }
