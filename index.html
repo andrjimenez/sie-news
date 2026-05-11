@@ -37,27 +37,13 @@
         html { font-size: 16px; -webkit-font-smoothing: antialiased; }
         body { font-family: var(--font-sans); background: var(--off-white); color: var(--text); min-height: 100vh; }
 
-        .site-header {
-            background: var(--navy);
-            padding: 0 2rem;
-            position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .header-inner {
-            max-width: 1400px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            height: 64px; gap: 2rem;
-        }
+        .site-header { background: var(--navy); padding: 0 2rem; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 2rem; }
         .brand { display: flex; flex-direction: column; gap: 3px; }
         .brand-name { font-family: var(--font-sans); font-weight: 700; font-size: 1.15rem; color: var(--white); letter-spacing: -0.01em; }
         .brand-sub  { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 400; }
         .header-right { display: flex; align-items: center; gap: 1rem; }
-        .status-pill {
-            display: flex; align-items: center; gap: 0.4rem;
-            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 999px; padding: 0.3rem 0.7rem;
-            font-family: var(--font-mono); font-size: 0.68rem; color: rgba(255,255,255,0.55);
-        }
+        .status-pill { display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 0.3rem 0.7rem; font-family: var(--font-mono); font-size: 0.68rem; color: rgba(255,255,255,0.55); }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4caf50; flex-shrink: 0; }
         .status-dot.loading { background: var(--orange); animation: blink 1s infinite; }
         .status-dot.error   { background: var(--red); }
@@ -66,38 +52,17 @@
 
         .page { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
 
-        .stats-bar {
-            display: none;
-            gap: 2.5rem; padding: 1rem 1.5rem;
-            background: var(--white); border: 1px solid var(--gray-200);
-            border-radius: var(--radius-lg); margin-bottom: 1.25rem;
-            box-shadow: var(--shadow-sm);
-        }
+        .stats-bar { display: none; gap: 2.5rem; padding: 1rem 1.5rem; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
         .stat { display: flex; flex-direction: column; gap: 3px; }
         .stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1; }
 
-        .toolbar {
-            display: flex; align-items: center; gap: 0.5rem;
-            margin-bottom: 1.5rem; flex-wrap: wrap;
-        }
+        .toolbar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .filter-label { font-size: 0.72rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.25rem; white-space: nowrap; }
-        .filter-btn {
-            font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500;
-            padding: 0.4rem 0.9rem; border-radius: 999px;
-            border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600);
-            cursor: pointer; transition: all var(--transition);
-        }
+        .filter-btn { font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600); cursor: pointer; transition: all var(--transition); }
         .filter-btn:hover { border-color: var(--navy-light); color: var(--navy-mid); }
         .filter-btn.active { background: var(--navy-mid); border-color: var(--navy-mid); color: var(--white); }
-        .refresh-btn {
-            margin-left: auto;
-            font-family: var(--font-sans); font-size: 0.8rem; font-weight: 600;
-            padding: 0.45rem 1rem; border-radius: var(--radius-sm);
-            border: 1.5px solid var(--navy-mid); background: var(--navy-mid); color: var(--white);
-            cursor: pointer; transition: all var(--transition);
-            display: flex; align-items: center; gap: 0.4rem;
-        }
+        .refresh-btn { margin-left: auto; font-family: var(--font-sans); font-size: 0.8rem; font-weight: 600; padding: 0.45rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--navy-mid); background: var(--navy-mid); color: var(--white); cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 0.4rem; }
         .refresh-btn:hover:not(:disabled) { background: var(--navy); border-color: var(--navy); }
         .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .refresh-btn .icon { font-size: 1rem; line-height: 1; display: inline-block; }
@@ -110,32 +75,20 @@
         .category-group { margin-bottom: 2.5rem; }
         .category-group.hidden { display: none; }
 
-        .cat-header {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.75rem 1.25rem; border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-        }
+        .cat-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 0.75rem; }
         .cat-header.hardware  { background: linear-gradient(135deg, #1a3a6e 0%, #002080 100%); }
         .cat-header.games     { background: linear-gradient(135deg, #1a1a6e 0%, #2d0080 100%); }
         .cat-header.network   { background: linear-gradient(135deg, #003366 0%, #004d99 100%); }
         .cat-header.corporate { background: linear-gradient(135deg, #1a2e5a 0%, #0d1a3a 100%); }
         .cat-header.industry  { background: linear-gradient(135deg, #2a1a5a 0%, #1a0040 100%); }
-
         .cat-header-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
         .cat-header-text { flex: 1; min-width: 0; }
         .cat-header-name { font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
         .cat-header-desc { font-size: 0.72rem; color: rgba(255,255,255,0.55); margin-top: 1px; }
         .cat-header-badge { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); border-radius: 999px; padding: 0.2rem 0.6rem; border: 1px solid rgba(255,255,255,0.2); }
 
-        .article-card {
-            background: var(--white); border: 1px solid var(--gray-200);
-            border-radius: var(--radius-lg); padding: 1.1rem 1.25rem;
-            margin-bottom: 0.625rem; display: flex; gap: 1rem; align-items: flex-start;
-            transition: box-shadow var(--transition), border-color var(--transition);
-            box-shadow: var(--shadow-sm);
-        }
+        .article-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; margin-bottom: 0.625rem; display: flex; gap: 1rem; align-items: flex-start; transition: box-shadow var(--transition), border-color var(--transition); box-shadow: var(--shadow-sm); }
         .article-card:hover { box-shadow: var(--shadow-md); border-color: var(--gray-400); }
-
         .article-main { flex: 1; min-width: 0; }
         .article-meta { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
         .article-source { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; color: var(--navy-light); letter-spacing: 0.03em; }
@@ -147,7 +100,7 @@
 
         .insight-box { background: var(--accent); border-left: 3px solid var(--navy-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.5rem 0.75rem; margin-bottom: 0.65rem; display: flex; gap: 0.5rem; align-items: flex-start; }
         .insight-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-mid); white-space: nowrap; padding-top: 0.1rem; flex-shrink: 0; }
-        .insight-text  { font-size: 0.82rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
+        .insight-text { font-size: 0.82rem; color: var(--gray-800); line-height: 1.5; font-style: italic; }
 
         .article-link { font-family: var(--font-mono); font-size: 0.68rem; color: var(--navy-light); text-decoration: none; font-weight: 600; letter-spacing: 0.02em; transition: color var(--transition); }
         .article-link:hover { color: var(--navy); text-decoration: underline; }
@@ -205,7 +158,6 @@
         <div class="stat"><span class="stat-label">Avg. score</span><span class="stat-value" id="stat-avg">—</span></div>
         <div class="stat"><span class="stat-label">Top score</span><span class="stat-value" id="stat-top">—</span></div>
     </div>
-
     <div class="toolbar">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" data-filter="">All relevant</button>
@@ -216,7 +168,6 @@
         <button class="filter-btn" data-filter="industry">Industry</button>
         <button class="refresh-btn" id="refresh-btn"><span class="icon">⟳</span> Refresh feed</button>
     </div>
-
     <div class="error-banner" id="error-banner"></div>
     <div id="feed"></div>
 </div>
@@ -226,14 +177,14 @@ const NEWS_API_KEY = '49f62eab61c1478086ac707012433080';
 const CACHE_KEY    = 'sie_v6_cache';
 const CACHE_TTL    = 30 * 60 * 1000;
 const MIN_SCORE    = 6;
-const PROXIES      = ['https://api.allorigins.win/get?url=', 'https://corsproxy.io/?'];
+const PROXIES      = ['https://api.allorigins.win/get?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest='];
 
 const CATEGORIES = {
-    hardware:  { label: 'Hardware',       desc: 'Console Hardware, Devices & Technology',   icon: '🎮' },
-    games:     { label: 'Games',          desc: 'SIE Exclusive Titles, Studios & Launches', icon: '🕹️' },
-    network:   { label: 'Network / PS+',  desc: 'PlayStation Plus & Online Services',       icon: '🌐' },
-    corporate: { label: 'Corporate',      desc: 'Earnings, M&A, Legal & Leadership',        icon: '📊' },
-    industry:  { label: 'Industry',       desc: 'Gaming Industry & Competitive Landscape',  icon: '🏭' }
+    hardware:  { label: 'Hardware',      desc: 'Console Hardware, Devices & Technology',   icon: '🎮' },
+    games:     { label: 'Games',         desc: 'SIE Exclusive Titles, Studios & Launches', icon: '🕹️' },
+    network:   { label: 'Network / PS+', desc: 'PlayStation Plus & Online Services',       icon: '🌐' },
+    corporate: { label: 'Corporate',     desc: 'Earnings, M&A, Legal & Leadership',        icon: '📊' },
+    industry:  { label: 'Industry',      desc: 'Gaming Industry & Competitive Landscape',  icon: '🏭' }
 };
 
 const COMPETITOR_TERMS = ['xbox','microsoft gaming','game pass','activision','bethesda','nintendo','switch 2','nintendo direct','mario','zelda','steam deck','valve','epic games','epic store','take-two','rockstar','ea games','electronic arts','ubisoft','square enix','capcom','sega','bandai namco','konami','summer game fest','the game awards','gdc'];
@@ -291,31 +242,36 @@ const fetchProxy = async (url,idx=0) => {
 };
 const fetchQuery = async q => {
     const url=`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&language=en&pageSize=100&apiKey=${NEWS_API_KEY}`;
-    try{ const d=await fetchProxy(url); return d.status==='error'?[]:(d.articles||[]); }catch(e){return[];}
+    try {
+        const d=await fetchProxy(url);
+        if(d.status==='error'){ console.error(`NewsAPI error for "${q}":`, d.message); return []; }
+        console.log(`Query "${q}" → ${(d.articles||[]).length} articles`);
+        return d.articles||[];
+    } catch(e){ console.error(`fetchQuery failed for "${q}":`, e.message); return[]; }
 };
 
 const enrichBatch = async articles => {
     if(!articles.length) return articles;
     const prompt = `You are a strategic analyst for a consulting team working with Sony Interactive Entertainment (SIE).
 
-Analyse each article and return a JSON array. For EACH article provide:
+Analyse each article and return a JSON array. For EACH article:
 - "index": article number
 - "score": 1–10 relevance to SIE/PlayStation
-  10 = direct SIE news (game launch, PS5/PS6, earnings, PS+, acquisition, legal)
-  8–9 = strong SIE angle (studio news, PSN, exclusive announcement)
+  10 = direct SIE news (game launch, PS5/PS6, earnings, PS+, acquisition)
+  8–9 = strong SIE angle (studio news, legal, PSN, exclusive)
   6–7 = relevant context (competitor move that directly impacts SIE strategy)
   4–5 = tangential mention
   1–3 = not relevant
 - "category": MUST be one of: hardware, games, network, corporate, industry
-  CRITICAL RULE: If the article is primarily about a competitor (Xbox, Nintendo, Microsoft, Epic, etc.)
+  CRITICAL: If the article is primarily about a competitor (Xbox, Nintendo, Microsoft, Epic, etc.)
   assign "industry" EVEN IF PlayStation is mentioned in passing.
   Only assign hardware/games/network/corporate if SIE/PlayStation is the PRIMARY subject.
   hardware = PS5/PS6/DualSense/console tech (Sony as main subject)
-  games = PlayStation game releases, SIE studios, exclusives (Sony as main subject)
+  games = PlayStation game releases, SIE studios, exclusives
   network = PS+, PSN, online services (Sony as main subject)
-  corporate = SIE earnings, M&A, legal, leadership, layoffs (Sony as main subject)
-  industry = competitor news, market trends, or any story where Xbox/Nintendo/publisher is primary focus
-- "insight": ONE specific sentence grounded in the article's actual content explaining why it matters to SIE. No generic statements.
+  corporate = SIE earnings, M&A, legal, leadership, layoffs
+  industry = competitor news, market trends, Xbox/Nintendo/publisher stories
+- "insight": ONE specific sentence grounded in the article content explaining why it matters to SIE.
 
 Articles:
 ${articles.map((a,i)=>`[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt||''}`).join('\n\n')}
@@ -382,7 +338,15 @@ const updateStats = articles => {
 };
 
 const renderSkeletons = () => {
-    el('feed').innerHTML=[1,2,3,4,5].map(()=>`<div class="skeleton-card"><div class="skel skel-xs"></div><div class="skel skel-sm"></div><div class="skel skel-sm2"></div><div class="skel skel-md"></div><div class="skel skel-md2"></div><div class="skel skel-md3"></div></div>`).join('');
+    el('feed').innerHTML=[1,2,3,4,5].map(()=>`
+        <div class="skeleton-card">
+            <div class="skel skel-xs"></div>
+            <div class="skel skel-sm"></div>
+            <div class="skel skel-sm2"></div>
+            <div class="skel skel-md"></div>
+            <div class="skel skel-md2"></div>
+            <div class="skel skel-md3"></div>
+        </div>`).join('');
 };
 
 const renderFeed = () => {
@@ -412,7 +376,18 @@ const renderFeed = () => {
                     </div>
                     <div class="score-badge ${scoreClass(a.score)}">${a.score}</div>
                 </div>`).join('');
-        return `<div class="category-group${hidden}" data-category="${key}"><div class="cat-header ${key}"><div class="cat-header-icon">${cat.icon}</div><div class="cat-header-text"><div class="cat-header-name">${cat.label}</div><div class="cat-header-desc">${cat.desc}</div></div><div class="cat-header-badge">${articles.length} article${articles.length!==1?'s':''}</div></div>${body}</div>`;
+        return `
+            <div class="category-group${hidden}" data-category="${key}">
+                <div class="cat-header ${key}">
+                    <div class="cat-header-icon">${cat.icon}</div>
+                    <div class="cat-header-text">
+                        <div class="cat-header-name">${cat.label}</div>
+                        <div class="cat-header-desc">${cat.desc}</div>
+                    </div>
+                    <div class="cat-header-badge">${articles.length} article${articles.length!==1?'s':''}</div>
+                </div>
+                ${body}
+            </div>`;
     }).join('');
 };
 
@@ -426,29 +401,58 @@ const refresh = async (force=false) => {
     const btn=el('refresh-btn');
     btn.disabled=true; btn.classList.add('spinning');
     setStatus('Fetching…','loading'); showError('');
-    if(!force){ const cached=loadCache(); if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter); el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; } }
+
+    if(!force){
+        const cached=loadCache();
+        if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter);
+            el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+            setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; }
+    }
+
     try {
         renderSkeletons();
         const raw=await Promise.allSettled(QUERIES.map(q=>fetchQuery(q)));
-        const seenUrls=new Set(),seenTitles=[],pool=[];
-        raw.forEach(r=>{ if(r.status!=='fulfilled')return; for(const a of r.value){ if(!a.url||seenUrls.has(a.url))continue; if(!isReputable(a))continue; if(seenTitles.some(t=>isSameStory(t,a.title)))continue; seenUrls.add(a.url); seenTitles.push(a.title); pool.push({title:a.title,source:a.source.name,date:formatDate(a.publishedAt),excerpt:a.description||'',url:a.url,score:0,category:'industry',insight:null}); } });
-        if(!pool.length){ showError('No articles found. Try refreshing.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
+        const seenUrls=new Set(), seenTitles=[], pool=[];
+        raw.forEach((r,i)=>{
+            if(r.status!=='fulfilled'){ console.warn(`Query ${i} failed:`, r.reason); return; }
+            for(const a of r.value){
+                if(!a.url||seenUrls.has(a.url)) continue;
+                if(!isReputable(a)) continue;
+                if(seenTitles.some(t=>isSameStory(t,a.title))) continue;
+                seenUrls.add(a.url); seenTitles.push(a.title);
+                pool.push({title:a.title,source:a.source.name,date:formatDate(a.publishedAt),excerpt:a.description||'',url:a.url,score:0,category:'industry',insight:null});
+            }
+        });
+        console.log(`Total pool after dedup: ${pool.length}`);
+
+        if(!pool.length){
+            showError('No articles found — check the browser console (F12) for details. The proxy may be down or rate-limited.');
+            setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return;
+        }
+
         setStatus('Scoring articles…','loading');
-        const enriched=[];
-        const BATCH=15;
-        for(let i=0;i<pool.length;i+=BATCH){ const result=await enrichBatch(pool.slice(i,i+BATCH)); enriched.push(...result); }
+        const enriched=[], BATCH=15;
+        for(let i=0;i<pool.length;i+=BATCH){
+            const result=await enrichBatch(pool.slice(i,i+BATCH));
+            enriched.push(...result);
+        }
         enriched.sort((a,b)=>b.score-a.score);
         allArticles=enriched;
         updateStats(allArticles); renderFeed(); applyFilter(currentFilter); saveCache(allArticles);
         el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
         setStatus('Ready','ready');
-    } catch(err){ console.error(err); showError(`Error: ${err.message}`); setStatus('Error','error');
+
+    } catch(err){
+        console.error(err); showError(`Error: ${err.message}`); setStatus('Error','error');
     } finally { btn.disabled=false; btn.classList.remove('spinning'); }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
     el('refresh-btn').addEventListener('click', ()=>refresh(true));
-    document.querySelector('.toolbar').addEventListener('click', e=>{ const btn=e.target.closest('.filter-btn'); if(btn) applyFilter(btn.dataset.filter); });
+    document.querySelector('.toolbar').addEventListener('click', e=>{
+        const btn=e.target.closest('.filter-btn');
+        if(btn) applyFilter(btn.dataset.filter);
+    });
     refresh(false);
 });
 setInterval(()=>refresh(true), 30*60*1000);
