@@ -55,7 +55,7 @@
         .stats-bar { display: none; gap: 2.5rem; padding: 1rem 1.5rem; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
         .stat { display: flex; flex-direction: column; gap: 3px; }
         .stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1; font-family: var(--font-sans); }
 
         .toolbar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .filter-label { font-size: 0.72rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 0.25rem; white-space: nowrap; }
@@ -250,35 +250,45 @@ const fetchQuery = async q => {
     } catch(e){ console.error(`fetchQuery failed for "${q}":`, e.message); return[]; }
 };
 
+/* Keyword scoring — runs immediately, no API needed */
+const keywordScore = a => {
+    const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
+    const tier1 = ['playstation 6','ps6 ','playstation 5','ps5 pro','ps5 slim','dualsense','psvr','playstation plus','ps plus','psn outage','sony interactive entertainment','sony bungie','bungie impairment','marathon game','insomniac','naughty dog','guerrilla','santa monica studio','housemarque','bluepoint','god of war','spider-man','horizon zero','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet and clank','playstation studios','playstation exclusive','ps5 exclusive'];
+    if(tier1.some(k=>t.includes(k))) return 10;
+    const tier2 = ['sony playstation','playstation game','ps5 game','ps4 game','playstation release','sony acquisition','sony layoff','sony earnings','playstation settlement','playstation lawsuit','sony ceo','playstation ceo','sony revenue','sony profit','sony fiscal','playstation price','ps5 price','playstation update','sony studio','playstation network','psn '];
+    if(tier2.some(k=>t.includes(k))) return 8;
+    const tier3 = ['sony','playstation','ps5','ps4'];
+    if(tier3.some(k=>t.includes(k))) return 7;
+    const tier4 = ['xbox','game pass','nintendo switch','switch 2','gaming market','gaming industry','video game market'];
+    if(tier4.some(k=>t.includes(k))) return 6;
+    return 3;
+};
+
 const enrichBatch = async articles => {
     if(!articles.length) return articles;
-    const prompt = `You are a strategic analyst for a consulting team working with Sony Interactive Entertainment (SIE).
 
-Analyse each article and return a JSON array. For EACH article:
+    // Score immediately with keywords — dashboard shows results even if Claude is unreachable
+    const prescored = articles.map(a => ({
+        ...a, score: keywordScore(a), category: fallbackCategory(a), insight: null
+    }));
+
+    // Attempt Claude enrichment for better scores + insights
+    try {
+        const prompt = `You are a strategic analyst for a consulting team working with Sony Interactive Entertainment (SIE).
+
+For EACH article return a JSON array with:
 - "index": article number
-- "score": 1–10 relevance to SIE/PlayStation
-  10 = direct SIE news (game launch, PS5/PS6, earnings, PS+, acquisition)
-  8–9 = strong SIE angle (studio news, legal, PSN, exclusive)
-  6–7 = relevant context (competitor move that directly impacts SIE strategy)
-  4–5 = tangential mention
-  1–3 = not relevant
-- "category": MUST be one of: hardware, games, network, corporate, industry
-  CRITICAL: If the article is primarily about a competitor (Xbox, Nintendo, Microsoft, Epic, etc.)
-  assign "industry" EVEN IF PlayStation is mentioned in passing.
-  Only assign hardware/games/network/corporate if SIE/PlayStation is the PRIMARY subject.
-  hardware = PS5/PS6/DualSense/console tech (Sony as main subject)
-  games = PlayStation game releases, SIE studios, exclusives
-  network = PS+, PSN, online services (Sony as main subject)
-  corporate = SIE earnings, M&A, legal, leadership, layoffs
-  industry = competitor news, market trends, Xbox/Nintendo/publisher stories
-- "insight": ONE specific sentence grounded in the article content explaining why it matters to SIE.
+- "score": 1–10 SIE relevance (10=direct SIE news, 8-9=strong angle, 6-7=relevant context, 1-5=tangential/irrelevant)
+- "category": hardware | games | network | corporate | industry
+  CRITICAL: competitor-primary articles (Xbox, Nintendo, Microsoft, Epic) = "industry" even if PlayStation mentioned
+  hardware=PS5/PS6/console tech, games=exclusives/studios, network=PS+/PSN, corporate=earnings/legal/leadership
+- "insight": one specific sentence grounded in the article explaining why it matters to SIE
 
 Articles:
-${articles.map((a,i)=>`[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt||''}`).join('\n\n')}
+${prescored.map((a,i)=>`[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt||''}`).join('\n\n')}
 
-JSON array only. No markdown. No preamble.`;
+JSON only. No markdown.`;
 
-    try {
         const res = await withTimeout(
             'https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'),
             { method:'POST', headers:{'Content-Type':'application/json'},
@@ -288,21 +298,21 @@ JSON array only. No markdown. No preamble.`;
         const d = await res.json();
         const txt = d.content?.[0]?.text||'[]';
         const results = JSON.parse(txt.replace(/```json|```/g,'').trim());
-        return articles.map((a,i) => {
+        return prescored.map((a,i) => {
             const r = results.find(x=>x.index===i);
-            let cat = r?.category || fallbackCategory(a);
+            if(!r) return a;
+            let cat = r.category || a.category;
             const fullText = `${a.title} ${a.excerpt||''}`.toLowerCase();
             if(hasCompetitor(fullText) && cat !== 'industry'){
-                const sonyTerms = ['sony','playstation','ps5','ps4','psn','ps plus'];
-                const sonyCount = sonyTerms.filter(t=>fullText.includes(t)).length;
+                const sonyCount = ['sony','playstation','ps5','ps4','psn'].filter(t=>fullText.includes(t)).length;
                 const compCount = COMPETITOR_TERMS.filter(t=>fullText.includes(t)).length;
                 if(compCount > sonyCount) cat = 'industry';
             }
-            return { ...a, score: r?.score||0, category: cat, insight: r?.insight||null };
+            return { ...a, score: r.score||a.score, category: cat, insight: r.insight||null };
         });
     } catch(e) {
-        console.warn('Enrichment failed:', e.message);
-        return articles.map(a => ({ ...a, score: 5, category: fallbackCategory(a), insight: null }));
+        console.warn('Claude unavailable, using keyword scores:', e.message);
+        return prescored;
     }
 };
 
@@ -401,14 +411,7 @@ const refresh = async (force=false) => {
     const btn=el('refresh-btn');
     btn.disabled=true; btn.classList.add('spinning');
     setStatus('Fetching…','loading'); showError('');
-
-    if(!force){
-        const cached=loadCache();
-        if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter);
-            el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-            setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; }
-    }
-
+    if(!force){ const cached=loadCache(); if(cached){ allArticles=cached; updateStats(allArticles); renderFeed(); applyFilter(currentFilter); el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); setStatus('Ready','ready'); btn.disabled=false; btn.classList.remove('spinning'); return; } }
     try {
         renderSkeletons();
         const raw=await Promise.allSettled(QUERIES.map(q=>fetchQuery(q)));
@@ -424,35 +427,23 @@ const refresh = async (force=false) => {
             }
         });
         console.log(`Total pool after dedup: ${pool.length}`);
-
-        if(!pool.length){
-            showError('No articles found — check the browser console (F12) for details. The proxy may be down or rate-limited.');
-            setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return;
-        }
+        if(!pool.length){ showError('No articles found — proxy may be down or rate-limited.'); setStatus('Error','error'); btn.disabled=false; btn.classList.remove('spinning'); return; }
 
         setStatus('Scoring articles…','loading');
         const enriched=[], BATCH=15;
-        for(let i=0;i<pool.length;i+=BATCH){
-            const result=await enrichBatch(pool.slice(i,i+BATCH));
-            enriched.push(...result);
-        }
+        for(let i=0;i<pool.length;i+=BATCH){ enriched.push(...await enrichBatch(pool.slice(i,i+BATCH))); }
         enriched.sort((a,b)=>b.score-a.score);
         allArticles=enriched;
         updateStats(allArticles); renderFeed(); applyFilter(currentFilter); saveCache(allArticles);
         el('timestamp').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
         setStatus('Ready','ready');
-
-    } catch(err){
-        console.error(err); showError(`Error: ${err.message}`); setStatus('Error','error');
+    } catch(err){ console.error(err); showError(`Error: ${err.message}`); setStatus('Error','error');
     } finally { btn.disabled=false; btn.classList.remove('spinning'); }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
     el('refresh-btn').addEventListener('click', ()=>refresh(true));
-    document.querySelector('.toolbar').addEventListener('click', e=>{
-        const btn=e.target.closest('.filter-btn');
-        if(btn) applyFilter(btn.dataset.filter);
-    });
+    document.querySelector('.toolbar').addEventListener('click', e=>{ const btn=e.target.closest('.filter-btn'); if(btn) applyFilter(btn.dataset.filter); });
     refresh(false);
 });
 setInterval(()=>refresh(true), 30*60*1000);
