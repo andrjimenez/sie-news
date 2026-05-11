@@ -251,17 +251,66 @@ const fetchQuery = async q => {
     } catch(e){ console.error(`fetchQuery failed:`, e.message); return[]; }
 };
 
+/* ── SCORING: Deloitte consulting relevance framework ── */
 const keywordScore = a => {
     const t = `${a.title} ${a.excerpt||''}`.toLowerCase();
-    const tier1 = ['playstation 6','ps6 ','playstation 5','ps5 pro','ps5 slim','dualsense','psvr','playstation plus','ps plus','psn outage','sony interactive entertainment','sony bungie','bungie impairment','marathon game','insomniac','naughty dog','guerrilla','santa monica studio','housemarque','bluepoint','god of war','spider-man','horizon zero','the last of us','ghost of tsushima','astro bot','helldivers','gran turismo','ratchet and clank','playstation studios','playstation exclusive','ps5 exclusive'];
-    if(tier1.some(k=>t.includes(k))) return 10;
-    const tier2 = ['sony playstation','playstation game','ps5 game','ps4 game','playstation release','sony acquisition','sony layoff','sony earnings','playstation settlement','playstation lawsuit','sony ceo','playstation ceo','sony revenue','sony profit','sony fiscal','playstation price','ps5 price','playstation update','sony studio','playstation network','psn '];
-    if(tier2.some(k=>t.includes(k))) return 8;
-    const tier3 = ['sony','playstation','ps5','ps4'];
-    if(tier3.some(k=>t.includes(k))) return 7;
-    const tier4 = ['xbox','game pass','nintendo switch','switch 2','gaming market','gaming industry','video game market'];
-    if(tier4.some(k=>t.includes(k))) return 6;
-    return 3;
+
+    // Score 10 — Strategic imperatives: partner-level intel before a client meeting
+    const s10 = [
+        'impairment charge','write-down','writedown','write down',
+        'acquisition','acquires','acquired','merger','takeover','buyout',
+        'earnings','quarterly results','financial results','annual results','operating loss',
+        'net income','operating income','revenue miss','revenue beat',
+        'layoff','layoffs','job cuts','redundancies','restructuring',
+        'class action','antitrust','settlement','regulatory fine','lawsuit',
+        'ceo','chief executive','cfo','chief financial','appointed','steps down','resigns',
+        'ps5 price','playstation price','console price','price increase','price cut',
+        'ps6','playstation 6','next gen console','next-gen sony',
+        'studio closure','studio shut','game cancelled','game shutdown',
+        'bungie impairment','concord shutdown','marathon cancell',
+        'sony interactive entertainment','sie strategy','sony gaming strategy',
+        'investor','shareholder','stock','share price','fiscal year','fiscal quarter'
+    ];
+    if(s10.some(k=>t.includes(k))) return 10;
+
+    // Score 8 — Market signals: competitive positioning, platform health, strategic moves
+    const s8 = [
+        'game pass price','game pass subscribers','xbox game pass',
+        'nintendo switch 2','switch 2 launch','switch 2 sales',
+        'ps plus subscribers','ps+ subscribers','playstation subscribers',
+        'psn outage','psn down','playstation network outage',
+        'ps5 sales','ps5 units','console sales','hardware sales',
+        'sony revenue','sony profit','sony fiscal','sony earnings',
+        'playstation market','gaming market share',
+        'microsoft gaming','activision deal','bethesda',
+        'exclusive deal','timed exclusive','third party exclusive',
+        'game pass expansion','xbox strategy',
+        'naughty dog','insomniac','guerrilla games','santa monica studio',
+        'housemarque','bluepoint','firesprite','bungie',
+        'sony acquisition','sony studio','sony partnership',
+        'playstation exclusive','ps5 exclusive','sony exclusive'
+    ];
+    if(s8.some(k=>t.includes(k))) return 8;
+
+    // Score 6 — Operational context: useful background for workstream leads
+    const s6 = [
+        'god of war','spider-man','horizon','the last of us','ghost of tsushima',
+        'gran turismo','astro bot','helldivers','ratchet','returnal',
+        'game launch','game release','game announcement','game reveal',
+        'ps plus games','playstation plus games','monthly games',
+        'dualsense','psvr','ps5 pro','ps5 slim',
+        'playstation store','psn store',
+        'gaming industry','video game industry','gaming market',
+        'nintendo','xbox','steam','epic games','take-two','ea games','ubisoft',
+        'game developer','game publisher','gaming revenue'
+    ];
+    if(s6.some(k=>t.includes(k))) return 6;
+
+    // Score 4 — Weak Sony mention, low consulting value (filtered out)
+    const s4 = ['sony','playstation','ps5','ps4','psn','ps plus'];
+    if(s4.some(k=>t.includes(k))) return 4;
+
+    return 2;
 };
 
 const fallbackCategory = a => {
