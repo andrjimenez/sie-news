@@ -91,7 +91,7 @@
                     <option value="corporate">Corporate</option>
                 </select>
             </div>
-            <button id="refresh-btn" onclick="refreshNews()">⟳ Refresh</button>
+            <button id="refresh-btn">⟳ Refresh</button>
             <div class="status">
                 <div class="status-dot" id="status-dot"></div>
                 <span id="status-text">Ready</span>
@@ -177,3 +177,225 @@
             'insomniac', 'guerrilla games', 'sucker punch',
             'housemarque', 'bluepoint', 'media molecule',
             'god of war', 'spider-man', 'horizon', 'the last of us', 'ghost of tsushima',
+            'gran turismo', 'ratchet and clank', 'sackboy', 'returnal', 'demon\'s souls',
+            'astro bot', 'helldivers', 'until dawn', 'concord', 'fairgame',
+            'playstation game', 'sony game', 'ps5 game', 'ps4 game',
+            'game reveal', 'game trailer', 'game preview', 'game review',
+            'game launch playstation', 'release playstation', 'gameplay playstation',
+            'new playstation', 'playstation release', 'sony release',
+            'playstation title', 'sony title', 'playstation launch'
+        ];
+
+        function assignCategory(article) {
+            const text = `${article.title} ${article.description || ''}`.toLowerCase();
+            if (CORPORATE_SIGNALS.some(kw => text.includes(kw))) return 'corporate';
+            if (HARDWARE_SIGNALS.some(kw => text.includes(kw))) return 'hardware';
+            if (NETWORK_SIGNALS.some(kw => text.includes(kw))) return 'network';
+            if (GAMES_SIGNALS.some(kw => text.includes(kw))) return 'games';
+            return null;
+        }
+
+        const searchQueries = [
+            { category: 'corporate', queries: [
+                'Sony Interactive Entertainment financial earnings quarterly',
+                'Sony PlayStation acquisition lawsuit settlement fine',
+                'Sony gaming layoff restructure impairment bungie',
+                'Sony PlayStation class action antitrust settlement'
+            ]},
+            { category: 'hardware', queries: [
+                'PlayStation 5 PS5 console hardware sales',
+                'PS5 Pro DualSense specs performance',
+                'Sony PlayStation console hardware announcement'
+            ]},
+            { category: 'games', queries: [
+                'PlayStation exclusive game release SIE',
+                'Sony first party game studio announcement',
+                'God of War Horizon Spider-Man PlayStation game'
+            ]},
+            { category: 'network', queries: [
+                'PlayStation Plus PS+ subscription tier Sony',
+                'PlayStation Network PSN online service',
+                'PS Plus subscribers growth Sony'
+            ]}
+        ];
+
+        const SONY_TERMS = [
+            'sony', 'playstation', 'ps5', 'ps4', 'psn', 'sie',
+            'ps plus', 'playstation plus', 'playstation studios',
+            'bungie', 'insomniac', 'naughty dog', 'santa monica',
+            'guerrilla', 'sucker punch', 'housemarque', 'bluepoint'
+        ];
+
+        const BLOCKED_SOURCES = [
+            'alltoc', 'the sun', 'dailystar', 'dailymail',
+            'attack of the fanboy', 'wegotthiscovered',
+            'givemesport', 'sportskeeda', 'talkesport',
+            'clutchpoints', 'fansided', 'ninja journalism'
+        ];
+
+        const PREFERRED_SOURCES = [
+            'bbc', 'reuters', 'bloomberg', 'financial times', 'wall street journal',
+            'the verge', 'ign', 'gamesindustry', 'eurogamer', 'polygon',
+            'kotaku', 'wired', 'techcrunch', 'engadget', 'nytimes',
+            'guardian', 'wsj', 'forbes', 'gamespot', 'pcgamer',
+            'arstechnica', 'gamesradar', 'vgc', 'videogameschronicle',
+            'gamerant', 'dualshockers', 'gamingbolt', 'thegamer', 'screenrant'
+        ];
+
+        function isReputableSource(article) {
+            const source = (article.source?.name || '').toLowerCase();
+            const url = (article.url || '').toLowerCase();
+            if (BLOCKED_SOURCES.some(s => source.includes(s) || url.includes(s))) return false;
+            return true;
+        }
+
+        function sourceScore(article) {
+            const source = (article.source?.name || '').toLowerCase();
+            return PREFERRED_SOURCES.some(s => source.includes(s)) ? 1 : 0;
+        }
+
+        function isSonyRelevant(article) {
+            const text = `${article.title} ${article.description || ''}`.toLowerCase();
+            return SONY_TERMS.some(term => text.includes(term));
+        }
+
+        function fingerprintTitle(title) {
+            const stopWords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','has','have','had','its','it','this','that','as','be','been','will','would','could','should','may','might','about','after','before','into','over','under','then','when','where','how','all','both','each','more','most','other','some','such','no','not','only','same','so','than','too','very','just','also','what','know','says','said']);
+            return new Set(
+                title.toLowerCase()
+                    .replace(/[^a-z0-9 ]/g, '')
+                    .split(' ')
+                    .filter(w => w.length > 3 && !stopWords.has(w))
+            );
+        }
+
+        function extractAmounts(title) {
+            return (title.match(/\$[\d]+(?:\.[\d]+)?(?:m|b|million|billion)?/gi) || [])
+                .map(n => n.replace(/[mb]/i, '').toLowerCase());
+        }
+
+        function extractTopicSignals(title) {
+            const t = title.toLowerCase();
+            const signals = [];
+            if (t.includes('price') && (t.includes('drop') || t.includes('cut') || t.includes('reduc') || t.includes('lower') || t.includes('cheaper'))) {
+                signals.push('price_change');
+            }
+            const salesMatch = t.match(/(\d+)\s*(million|billion)\s*(units|consoles|sold|shipped)/);
+            if (salesMatch) signals.push('sales_' + salesMatch[1] + salesMatch[2]);
+            return signals;
+        }
+
+        function isSameStory(titleA, titleB) {
+            const amtsA = extractAmounts(titleA);
+            const amtsB = extractAmounts(titleB);
+            if (amtsA.length > 0 && amtsB.length > 0 && amtsA.some(a => amtsB.includes(a))) return true;
+
+            const sigsA = extractTopicSignals(titleA);
+            const sigsB = extractTopicSignals(titleB);
+            if (sigsA.length > 0 && sigsB.length > 0 && sigsA.some(s => sigsB.includes(s))) return true;
+
+            const wordsA = fingerprintTitle(titleA);
+            const wordsB = fingerprintTitle(titleB);
+            if (wordsA.size === 0 || wordsB.size === 0) return false;
+            const overlap = [...wordsA].filter(w => wordsB.has(w)).length;
+            return overlap / Math.min(wordsA.size, wordsB.size) >= 0.45;
+        }
+
+        async function generateInsightsForCategory(articles, categoryLabel, categoryContext) {
+            if (articles.length === 0) return articles;
+
+            const prompt = `You are a strategic analyst supporting a consulting team working with Sony Interactive Entertainment (SIE).
+
+For each article below, write a single concise sentence explaining WHY it matters specifically to SIE's ${categoryLabel} business.
+The insight must be directly grounded in what the article is actually about — do not give generic statements.
+Category context: ${categoryContext}
+
+Articles:
+${articles.map((a, i) => `[${i}] TITLE: ${a.title}\nEXCERPT: ${a.excerpt}`).join('\n\n')}
+
+Respond ONLY with a JSON array of objects with keys "index" (number) and "insight" (string).
+Example: [{"index":0,"insight":"..."},{"index":1,"insight":"..."}]
+No markdown, no explanation, JSON only.`;
+
+            try {
+                const claudeUrl = 'https://api.anthropic.com/v1/messages';
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(claudeUrl);
+
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data.content?.[0]?.text || '[]';
+                const results = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+                return articles.map((a, i) => {
+                    const match = results.find(r => r.index === i);
+                    return { ...a, whyItMatters: match?.insight || null };
+                });
+
+            } catch (e) {
+                console.error('Claude insight generation failed:', e);
+                return articles.map(a => ({ ...a, whyItMatters: null }));
+            }
+        }
+
+        function setStatus(text, type = 'ready') {
+            document.getElementById('status-text').textContent = text;
+            document.getElementById('status-dot').className = 'status-dot ' + (type === 'loading' ? 'loading' : type === 'error' ? 'error' : '');
+        }
+        function showError(msg) { document.getElementById('error-container').innerHTML = `<div class="error-message">${msg}</div>`; }
+        function clearMessages() { document.getElementById('error-container').innerHTML = ''; }
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(timer);
+                return response;
+            } catch (e) {
+                clearTimeout(timer);
+                throw e;
+            }
+        }
+
+        async function fetchWithProxy(apiUrl, proxyIndex = 0) {
+            if (proxyIndex >= PROXIES.length) throw new Error('All proxies failed');
+            try {
+                const proxyUrl = PROXIES[proxyIndex] + encodeURIComponent(apiUrl);
+                const response = await fetchWithTimeout(proxyUrl, {}, 10000);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                return data.contents ? JSON.parse(data.contents) : data;
+            } catch (e) {
+                console.warn(`Proxy ${proxyIndex} failed, trying next...`, e.message);
+                return fetchWithProxy(apiUrl, proxyIndex + 1);
+            }
+        }
+
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch
